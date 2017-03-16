@@ -1,0 +1,66 @@
+<!doctype html>
+
+<html>
+<head>
+	<title>Grumbler - Let's grumbling!</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href='/css/main.css' />
+	{{#each css}}
+        <link rel="stylesheet" type="text/css" href='/css/{{this}}.css' />
+    {{/each}}
+	{{#each scripts}}
+		{{{this}}}
+    {{/each}}
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+</head>
+
+<body>
+
+<div class="menu">
+	<a class='title' href='/'>Grumbler</a>
+	<nav>
+		<ul>
+			<li><a class='menu-btn' href='/'>home</a></li>
+			<li><a class='menu-btn' href='/list'>抱怨大全</a></li>
+			<li><a class='menu-btn' href='/post'>開始抱怨</a></li>
+			<li><a class='menu-btn' href='/about'>關於這裡</a></li>
+			{{#if uid}}
+			<li><a class='menu-btn' href='/user/{{uid}}/posts'>你的抱怨</a></li>
+			<li><a class='menu-btn' href='/user/'>管理帳號</a></li>
+			<li><a class='menu-btn' href='/logout'>登出</a></li>
+			{{else}}
+			<li><a class='menu-btn' href='/register'>註冊</a></li>
+			<li><a class='menu-btn' href='/login'>登入</a></li>
+			{{/if}}
+		</ul>
+	</nav>
+	
+	{{#if uid}}<div class='displayName'>welcome, {{displayName}}!</div>{{/if}}
+	
+	<div class='menu-footer'><a href='https://github.com/royvbtw/grumbler'>github</a><br/>Roy Lu, 2017</div>
+	
+</div><!-- end of menu -->
+
+{{#if flash}}<div class='flash-container'>
+<div class='flash'>{{flash}}<span class='btnFlashClose'>x</span></div></div>{{/if}}
+
+<div class="viewBody">
+	{{{body}}}
+</div>
+
+</body>
+
+<script>
+
+$('.flash').on('click', function(evt){
+	$(this).fadeOut(800);
+});
+
+$(document).ready(function(){
+	$('.flash').hide().delay(100).fadeIn(800);
+});
+
+</script>
+
+</html>

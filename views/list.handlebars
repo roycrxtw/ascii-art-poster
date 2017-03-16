@@ -1,0 +1,35 @@
+
+<h1>負能量合輯</h1>
+
+<p>{{#if owner}}您的文章列表{{else}}來看看別人在碎念甚麼{{/if}}</p>
+
+<p>最多顯示30篇文章, 文章數{{post.length}}</p>
+
+<div class='masonry'>
+{{#each post}}<div class='post'>
+{{#if this.isExpired}}
+	<div class='post-title expired'>{{this.title}}
+	<span class='expired-post-note'>本文章已過期</span></div>
+{{else}}
+	<div class='post-title'>{{this.title}}</div>
+{{/if}}
+
+<div class='content'>
+	<pre><code>{{this.content}}</code></pre>
+	<div class='info'><a href='/post/{{this.postId}}'>#</a>
+	{{this.created}} by <a href='/user/{{this.user.authId}}'>{{this.user.name}}</a><br/>
+	{{#if this.expiry}}文章期限: {{this.expiry}}{{/if}}
+	</div>
+</div>
+</div>
+{{/each}}
+
+</div><!--end of masonry div-->
+
+<script>
+$(document).ready(function(){
+	//$('.post').each(function(i){
+		//$(this).hide().delay(i * 200).fadeIn(1000);
+	//});
+});
+</script>

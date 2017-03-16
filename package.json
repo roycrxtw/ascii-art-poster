@@ -1,0 +1,28 @@
+{
+  "name": "grumbler",
+  "version": "0.0.1",
+  "description": "Good place for grumbling",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Roy Lu (royvbtw)",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.16.1",
+    "express": "^4.14.1",
+    "express-handlebars": "^3.0.0",
+    "express-session": "^1.15.1",
+    "express-subdomain": "^1.0.5",
+    "google-auth-library": "^0.10.0",
+    "mongoose": "^4.8.5",
+    "passport": "^0.3.2",
+    "passport-facebook": "^2.1.1",
+    "passport-google-oauth20": "^1.0.0",
+    "request": "^2.81.0"
+  },
+  "directories": {
+    "doc": "doc"
+  },
+  "devDependencies": {}
+}

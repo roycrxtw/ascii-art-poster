@@ -1,0 +1,423 @@
+
+*{
+	box-sizing: border-box;
+}
+
+/*setup font size*/
+html{
+	font-family: "Microsoft JhengHei";
+	font-size: 14px;	/* the min value*/
+	/*font-size: 3.5vmin;*/
+}
+@media only screen and (min-width: 1024px){
+	html{
+		font-size: 2.5vmin;
+	}
+}
+
+body{
+	position: relative;
+	
+	background: snow;
+	margin: 0px;
+	padding: 0px;
+	color: black;
+}
+
+footer{
+	display: block;
+	text-align: center;
+	margin: 30px 0 0 0;
+	padding: 20px 0 20px 250px;
+	background: darkslategray;
+	color: snow;
+}
+
+a:not([class]){
+	margin: 0;
+	padding: 0;
+	text-decoration: none;
+	transition: all 500ms;
+}
+
+a:not([class]):hover{
+	color: red;
+}
+
+h1{
+	margin: 20px 0 0 0;
+	text-align: center;
+	color: slategray;
+	border: 0px solid black;
+}
+
+p{
+	width: 100%;
+	margin: auto;
+	padding: 10px 0;
+	border: 0px solid red;
+	text-align: left;
+}
+
+pre{
+	font-family: "Microsoft JhengHei";
+	white-space: pre-wrap;
+}
+
+
+
+span[data-info]{
+	position: relative;
+}
+
+span[data-info]:hover::before {
+	content: attr(data-info);
+	position: absolute;
+	left: 0;
+	bottom: 32px;
+	min-width: 120px;
+	border: 0px solid black;
+	border-radius: 10px;
+	background-color: LightSlateGray;
+	box-shadow: 0px 0px 10px 0px gray;
+	padding: 12px;
+	color: snow;
+	font-size: 14px;
+	z-index: 1;
+}
+
+
+.icon-xauth{
+	display: block;
+	width: 40px;
+	margin: auto;
+	border: 1px solid lightgray;
+	border-radius: 3px;
+}
+
+.block-xauth{
+	display: inline-block;
+	position: relative;
+	margin: 10px auto;
+	border: 0px solid lightgray;
+}
+
+.block-xauth-note{
+	display: none;
+}
+
+@media only screen and (min-width: 768px){
+	.block-xauth-note{
+		position: absolute;
+		display: flex;
+		width: 160px;
+		height: 130px;
+		border: 2px solid gray;
+		border-radius: 15px;
+		box-shadow: 0px 0px 10px 0 skyblue;
+		background-color: snow;
+		font-size: 16px;
+		color: gray;
+		top: -30px;;
+		right: -180px;
+		justify-content: center;
+		align-items: center;
+		cursor: help;
+	}
+}
+
+.block-xauth-note::after {
+	content: " ";
+	position: absolute;
+	top: 50%;
+	right: 100%;
+	margin-top: -12px;
+	border-width: 12px;
+	border-style: solid;
+	border-color: transparent gray transparent transparent;
+}
+
+.btn-xauth{
+	display: inline-block;
+	width: 200px;
+	margin: 5px;
+	border-radius: 10px;
+	box-shadow: 0 0 5px 0 indigo;
+	padding: 10px;
+	background: snow;
+	color: slategray;
+	align-items: center;
+	justify-content: center;
+	transition: all 500ms;
+}
+.btn-xauth:hover{
+	color: snow;
+	background-color: PaleVioletRed ;
+	box-shadow: 0 0 5px 0 gray;
+}
+
+
+.block-little{
+	display: inline-flex;
+	width: 100px;
+	height: 100px;
+	margin: 10px;
+	border-radius: 10px;
+	background-color: #3bb0de;
+	justify-content: center;
+	align-items: center;
+	color: snow;
+	font-size: 16px;
+	text-decoration: none;
+}
+.block-little:hover{
+	color: snow;
+	background-color: #2196c4;
+	box-shadow: 0 0 50px 50px gray inset;
+}
+
+.btnFlashClose{
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	padding: 10px;
+	cursor: pointer;
+}
+
+
+
+
+.flash-container{
+	width: 95%;
+	padding: 0;
+}
+@media only screen and (min-width: 1024px){
+	.flash-container{
+		width: 100%;
+		padding-left: 250px;
+	}
+}
+
+.flash{
+	display: none;
+	position: relative;
+	width: 90%;
+	margin: 10px auto;
+	box-shadow: 0 0 5px 0 snow;
+	border-radius: 5px;
+	padding: 10px;
+	background-color: red;
+	color: snow;
+	cursor: pointer;
+}
+@media only screen and (min-width: 1024px){
+	.flash{
+		width: 400px;
+		padding: 10px;
+	}
+}
+.flash:before{
+	content: '\002757';
+	padding: 10px;
+	color: snow;
+}
+
+
+.panel{
+	width: 95%;
+	margin: 10px;
+	border: 1px solid gray;
+	text-align: left;
+	border-radius: 5px;
+	box-shadow: 0 0 3px 0 lightcoral;
+}
+@media only screen and (min-width: 768px){
+	.panel{
+		width: 350px;
+	}
+}
+.panel-title{
+	background-color: dimgrey;
+	color: snow;
+	padding: 10px 15px;
+}
+.panel-item{
+	border-bottom:  1px solid gray;
+	padding: 10px 15px;
+}
+
+
+
+.viewBody{
+	display: block;
+	width: 90%;
+	margin: auto;
+	border: 0px solid blue;
+	padding: 0px;
+	text-align: center;
+}
+@media only screen and (min-width: 1024px){
+	.viewBody{
+		width: 80vw;
+		margin-left: 18vw;
+		padding: 0;
+	}
+}
+
+#test{
+	content: "\2713";
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, .2);
+    font-size: 15px;
+    color: #f3f3f3;
+    text-align: center;
+    line-height: 15px;
+}
+
+/*menu settings*/
+
+.menu{
+	display: block;
+	width: 100vw;
+	margin: 0;
+	border: 0px solid blue;
+	background-color: slategrey;
+	color: snow;
+	font-size: 1.3rem;
+	font-weight: 100;
+	transition: all 500ms;
+}
+@media only screen and (min-width: 1024px){
+	.menu{
+		position: fixed;
+		width: 17vw;
+		min-height: 100%;
+		left: 0;
+		top: 0;
+		background-color: snow;
+		color: slategrey;
+		font-size: 2.5vmin;
+	}
+}
+
+.menu nav{
+	display: block;
+	margin: 0;
+	border: 0px solid blue;
+	padding: 0;
+}
+
+	
+.menu ul{
+	margin: 0;
+	border: 0px solid yellow;
+	padding: 0;
+	list-style-type: none;
+}
+.menu li{
+	display: inline-block;
+	border: 0px solid blue;
+	margin: 0;
+	padding: 1px;
+}
+
+@media only screen and (min-width: 1024px){
+	.menu ul{
+		width: 100%;
+		margin: auto;
+		padding: 0 0 0 50px;
+		text-align: left;
+		border: 0px solid red;
+	}
+	.menu li{
+		display: block;
+		border: 0px solid red;
+		margin: 0;
+		padding: 20px 0 0 0;
+	}
+}
+
+.menu nav a{
+	display: block;
+	text-decoration: none;
+	color: snow;
+	border: 0px solid green;
+	border-radius: 3px;
+	padding: 5px;
+	
+}
+.menu nav a:hover{
+	color: white;
+	background-color: #c5ccd3;
+}
+@media only screen and (min-width: 1024px){
+	.menu nav a{
+		display: inline-block;
+		color: black;
+	}
+	
+	.menu nav a:hover{
+		color: snow;
+		background-color: #c5ccd3;
+	}
+}
+
+.menu .displayName{
+	display: block;
+	margin: 0;
+	padding: 0;
+	color: snow;
+	border: 1px solid snow;
+	text-align: center;
+}
+@media only screen and (min-width: 1024px){
+	.menu .displayName{
+		width: 100%;
+		padding: 10px 0 10px 55px;
+		color: indianred;
+		text-align: left;
+	}
+}
+
+.menu-footer{
+	display: none;
+}
+@media only screen and (min-width: 1024px){
+	.menu-footer{
+		display: block;
+		position: absolute;
+		bottom: 40px;
+		width: 100%;
+		margin-top: 10px;
+		padding: 25px 0 25px 55px;
+		color: snow;
+		text-align: left;
+		background-color: darkslategrey;
+	}
+	.menu-footer a{
+		color: silver;
+	}
+}
+
+.menu .title{
+	display: block;
+	margin: 0 auto;
+	border: 0px solid red;
+	padding: 10px;
+	background-color: black;
+	color: snow;
+	font-size: 1.6rem;
+	font-weight: 100;
+	text-align: center;
+	text-decoration: none;
+}
+@media only screen and (min-width: 1024px){
+	.menu .title{
+		display: block;
+		margin: 0;
+		padding: 10px 0px 10px 55px;
+		color: black;
+		font-size: 3vmin;
+		text-align: left;
+		background-color: snow;
+	}
+}

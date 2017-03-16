@@ -1,0 +1,104 @@
+
+form{
+	display: block;
+	width: 88%;
+	margin: 10px auto;
+	border: 0px solid red;
+	border-radius: 10px;
+	padding: 20px;
+	background-color: snow;
+	box-shadow: 0 0 5px 0 indigo;
+	transition: all 500ms;
+}
+@media only screen and (min-width: 768px){
+	form{
+		width: 400px;
+	}
+}
+@media only screen and (min-width: 1024px){
+	form{
+		width: 30vw;
+	}
+}
+form:hover{
+	color: snow;
+	background-color: RosyBrown;
+}
+
+input[readonly]{
+	cursor:default;
+	color: gray;
+	border: 0px;
+}
+
+
+label{
+	width: 100%;
+	display: block;
+	text-align: left;
+	margin: 3px 0px;
+}
+
+.cbLabel{
+	display: inline-block;
+	width: auto;
+	line-height: 35px;
+	padding: 0px 5px;
+	border-radius: 5px;
+	border: 1px solid snow;
+	background-color: rgb(59, 176, 222);
+	color: snow;
+}
+
+.cbLabel:hover{
+	
+	cursor: pointer;
+	background-color: rgb(81, 184, 225);
+}
+
+.field{
+	width: 100%;
+	padding: 10px;
+	margin: 5px 0px;
+	transition: all 500ms;
+	color: grey;
+}
+@media only screen and (min-width: 1024px){
+	.field{
+		font-size: 3vmin;
+		line-height: 5vmin;
+		height: 5vmin;
+	}
+}
+
+.field:not([readonly]):focus{
+	background-color: Moccasin;
+	border: 1px solid snow;
+	color: brown;
+	outline: none;
+}
+
+.btnSubmit{
+	cursor: pointer;
+	width: 100px;
+	height: 45px;
+	margin: 5px;
+	box-shadow: none;
+	border:1px solid gray;
+	border-radius: 10px;
+	outline: 0;
+	background-color: snow;
+	color: black;
+	text-shadow: none;
+	transition: all 600ms;
+	/*box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);*/
+}
+@media only screen and (min-width: 1024px){
+	.btnSubmit{
+		font-size: 2.5vmin;
+	}
+}
+.btnSubmit:hover{
+	border-radius: 15px;
+	box-shadow: 0 0 6px rgba(35, 173, 278, 1);
+}

@@ -1,0 +1,64 @@
+<h1>註冊一個負能量帳號</h1>
+
+<div class='block-xauth'>
+<p class='block-xauth-note'>不想註冊嗎?<br/>直接透過社群軟體登入</p>
+
+<a href="/login/facebook"><div class='btn-xauth'>
+<img src='/img/icon-fb-100.jpg' class='icon-xauth'/>使用facebook快速登入</div></a>
+
+<a href="/login/google"><div class='btn-xauth'>
+<img src='/img/icon-google-100.jpg' class='icon-xauth'/>使用google快速登入</div></a>
+</div>
+
+<form method="post" action='/register'>
+
+<div>
+	<label>登入帳號</label>
+	<input type="text" name="account" placeholder="至少6個英文與數字組合" 
+			class='field' value='{{user.account}}'
+			data-validation="length alphanumeric" data-validation-length='6-20' 
+			minlength=6 required/>
+</div>
+<div>
+	<label>密碼</label>
+	<input type="password"  name='password_confirmation' class='field' 
+			placeholder="至少8個英文與數字組合" minlength=8 required 
+			data-validation="length alphanumeric" data-validation-length='8-20' />
+</div>
+<div>
+	<label>確認密碼</label>
+	<input type="password" name='password' placeholder="再次輸入您的密碼"
+			class='field' minlength=8 required
+			data-validation="confirmation" />
+</div>
+<div>
+	<label>顯示名稱</label>
+	<input type="text" name="name" placeholder="顯示名稱"
+			class='field' value='{{user.name}}' minlength=2 required/>
+</div>
+<div>
+	<label>email</label>
+	<input type="email" name="email" placeholder="email" 
+			class='field' value='{{user.email}}'
+			data-validation="email" required/>
+</div>
+	<input class="btnSubmit" type="submit" value="註冊" />
+</form>
+
+<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
+<script>
+var validation_tw = {
+	badAlphaNumeric: '只能使用大小寫英文字母或數字',
+	badEmail: '請輸入合法的email',
+	notConfirmed: '請確認密碼輸入正確',
+	lengthBadStart: '必須輸入',
+	lengthBadEnd: '個大小寫英文字母或數字',
+};
+$.validate({
+	language: validation_tw,
+	modules : 'security',
+	onSuccess: function(){
+		//
+	}
+});
+</script>

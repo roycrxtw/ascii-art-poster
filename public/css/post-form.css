@@ -1,0 +1,118 @@
+form{
+	width: 90%;
+	padding: 0 0 20px 0;
+	background-color: Moccasin;
+}
+@media only screen and (min-width: 1024px){
+	form{
+		width: 800px;
+	}
+}
+form:hover{
+	background-color: #f3d8a5;
+}
+
+input[name='title']{
+	width: 95%;
+	padding: 10px;
+	background-color: Moccasin  ;
+	outline: none;
+	border: 1px solid snow;
+	font-size: 18px;
+}
+input[name='title']:focus{
+	background-color: oldlace;
+}
+
+select{
+	border: 0px solid red;
+	font-size: 16px;
+	background-color: oldlace;
+}
+
+textarea{
+	display: block;
+	width: 95%;
+	height: 250px;
+	margin: auto;
+	padding: 15px;
+	font-size: 130%;
+	border: 2px solid snow;
+	background-color: Moccasin  ;
+	outline: none;
+	font-family: Courier New;
+}
+textarea:focus{
+	border-color: lightgray;
+	background-color: oldlace ;
+}
+
+.cbLabel{
+	display: inline-block;
+	width: auto;
+	line-height: 40px;
+	padding: 0px 10px;
+	margin: 2px;
+	border-radius: 6px;
+	border: 1px solid snow;
+	/*background-color: rgb(59, 176, 222);*/
+	background-color: darkgray;
+	color: snow;
+}
+
+.cbLabel:hover{
+	cursor: pointer;
+	background-color: rgb(81, 184, 225);
+}
+
+.form-title{
+	display: block;
+	margin-bottom: 10px;
+	border-radius: 10px 10px 0 0;
+	background-color: gray;
+	color: snow;
+	text-align: left;
+	padding: 15px;
+	font-size: 18px;
+}
+
+.btnSubmit{
+	display: block;
+	cursor: not-allowed;
+	width: 200px;
+	line-height: 35px;
+	margin: 2px auto;
+	border: 1px solid rgb(59, 150, 200);
+	border-radius: 10px;
+	padding: 0px 5px;
+	background-color: gray;
+	box-shadow: none;
+	color: snow;
+	font-size: 16px;
+	line-height: 45px;
+	transition: 500ms;
+	/*box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);*/
+}
+
+.btnSubmit-ok{
+	width: 100px;
+	background-color:  rgb(59, 150, 200);
+	color: snow;
+	cursor: pointer;
+}
+
+.btnSubmit:not([disabled]):hover{
+	/*background-color: rgb(70, 170, 220);
+	box-shadow: 0 0 16px rgba(35, 173, 278, 1);*/
+	background-color: snow;
+	color: rgb(59, 150, 200);
+}
+.form-grumbling .btnSubmit:hover::after{
+	/*content: '\00bb';
+	padding-left: 5px;*/
+}
+
+.g-recaptcha{
+	margin: 10px auto;
+	width: 320px;
+}
