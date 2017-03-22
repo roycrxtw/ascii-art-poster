@@ -1,7 +1,7 @@
 
 'use strict';
 
-var serverConfig = require('./config/main.config')(__dirname);
+var serverConfig = require('./config/main.config');
 
 var https = require('https');
 var fs = require('fs');
