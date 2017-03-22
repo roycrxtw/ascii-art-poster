@@ -1,7 +1,7 @@
 
 'use strict';
 
-var serverConfig = require('./config/main.config');
+var serverConfig = require('./config/main.config')(__dirname);
 
 var https = require('https');
 var fs = require('fs');
@@ -50,6 +50,7 @@ app.use(express.static(__dirname + '/public'));
 
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
+app.set('views', __dirname + '/views')
 
 // setup time log middleware for response time recording.
 app.use(require('./services/time-log'));
