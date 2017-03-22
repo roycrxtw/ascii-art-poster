@@ -4,7 +4,7 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var config = require('../config/main.config');
+var config = require('../config/db.config');
 
 
 // this setting is recommended by mLab.
