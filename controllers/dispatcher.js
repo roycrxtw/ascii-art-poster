@@ -7,7 +7,7 @@ var express = require('express'),
 var passport = require('passport');
 var service = require('../services/main-service');
 var expiryData = require('../services/expiryData');
-var dataConfig = require('../config/data.config');
+var dataConfig = require('../data.config');
 var mainConfig = require('../config/main.config');
 
 router.use(function(req, res, next){
