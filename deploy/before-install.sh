@@ -1,6 +1,6 @@
 # deploy/before-install
 #!/bin/bash
-pm2 delete myhome
+pm2 delete grumbler
 cp /var/node/grumbler/config ~/backup/grumbler/
 shopt -s extglob
 rm -fr /var/node/grumbler/.gitignore
