@@ -12,6 +12,18 @@ form:hover{
 	background-color: #f3d8a5;
 }
 
+input[name='category']{
+	width: 95%;
+	padding: 10px;
+	background-color: Moccasin  ;
+	outline: none;
+	border: 1px solid snow;
+	font-size: 18px;
+}
+input[name='category']:focus{
+	background-color: oldlace;
+}
+
 input[name='title']{
 	width: 95%;
 	padding: 10px;

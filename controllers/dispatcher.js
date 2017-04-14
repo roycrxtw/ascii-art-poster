@@ -283,6 +283,7 @@ router.get('/post', function(req, res, next){
 router.post('/post', function(req, res, next){
 	var post = {
 		title: req.body.title,
+		category: req.body.category,
 		content: req.body.content,
 		expiry: req.body.expiry,
 		ghost: req.body.ghost || false,

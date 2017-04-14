@@ -2,7 +2,9 @@
 <form class='form-grumbling' method="post" action="/post">
 <div class='form-title'>發個抱怨文</div>
 <input type="text" name='title' value='{{post.title}}' 
-		placeholder="抱怨主題" required />
+		placeholder="抱怨主題" required/>
+<input type="text" name='category' value='{{post.category}}' 
+		placeholder="文章分類" required  maxlength='2'/>
 <textarea id='fieldContent' name='content' placeholder="抱怨內容" 
 		required>{{post.content}}</textarea>
 <span data-info='設定文章消失時間'><label class='cbLabel'>
@@ -32,8 +34,6 @@ function enableBtn(){
 		$('.btnSubmit').addClass('btnSubmit-ok');
 	}, 800);
 	
-
-
 	//$('.btnSubmit').removeAttr('disabled');
 }
 

@@ -273,6 +273,7 @@ function createPost(post){
 				var preparedPost = {
 					title: post.title,
 					content: post.content,
+					category: post.category,
 					user:{
 						authId: post.uid,
 						name: post.uname
@@ -371,6 +372,7 @@ function doGetPosts(conditions, selection = ''){
 			console.log('[service] docs.length', docs.length);
 			var d = new Date();
 			for(var i in docs){
+				console.log('tags=', docs[i].tags);
 				docs[i].postId = docs[i]._id;	// remap _id to postId
 				delete docs[i]._id;
 				if(docs[i].anonymous){
@@ -378,6 +380,9 @@ function doGetPosts(conditions, selection = ''){
 					docs[i].user.name = '這是個忍者!';
 				}
 				delete docs[i].anonymous;
+				if(docs[i].category === undefined){
+					docs[i].category = '無';
+				}
 				docs[i].created = formatDate(docs[i].created);
 				if(docs[i].expiry){
 					if(docs[i].expiry < d){

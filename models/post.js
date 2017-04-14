@@ -7,6 +7,7 @@ mongoose.Promise = global.Promise;
 var postSchema = mongoose.Schema({
 	title: String,
 	content: String,
+	category: String,
 	user:{
 		authId: String,
 		name: String

@@ -6,18 +6,24 @@
 <p>最多顯示30篇文章, 文章數{{post.length}}</p>
 
 <div class='masonry'>
-{{#each post}}<div class='post'>
+{{#each post}}<div class='post' data-pid='{{this.postId}}'>
+<div class='post-header'>
+<div class='category'>{{this.category}}</div>
 {{#if this.isExpired}}
 	<div class='post-title expired'>{{this.title}}
 	<span class='expired-post-note'>本文章已過期</span></div>
 {{else}}
 	<div class='post-title'>{{this.title}}</div>
 {{/if}}
+<div class='post-author'>{{this.user.name}}</div>
+</div><!-- end of post-header -->
 
 <div class='content'>
 	<pre><code>{{this.content}}</code></pre>
-	<div class='info'><a href='/post/{{this.postId}}'>#</a>
-	{{this.created}} by <a href='/user/{{this.user.authId}}'>{{this.user.name}}</a><br/>
+	<div class='info'>
+		by <a href='/user/{{this.user.authId}}'>{{this.user.name}}</a>
+		<a href='/post/{{this.postId}}'>#</a>
+	{{this.created}}<br/>
 	{{#if this.expiry}}文章期限: {{this.expiry}}{{/if}}
 	</div>
 </div>
@@ -28,8 +34,23 @@
 
 <script>
 $(document).ready(function(){
-	//$('.post').each(function(i){
-		//$(this).hide().delay(i * 200).fadeIn(1000);
-	//});
+	var currentPost = null;
+	
+	$('.post-header').click(function(evt){
+		var targetPost = $(this).parent();
+		if(currentPost){
+			currentPost.find('.content').fadeOut(500, function(){
+				console.log('callback now');
+				$('body').animate({
+					scrollTop: targetPost.offset().top
+				}, 500);
+			});
+		}
+		currentPost = targetPost;
+		console.log($(this).attr('data-pid') + ' in action.');
+		targetPost.find('.content').fadeIn(333);
+	});
 });
+
+
 </script>
