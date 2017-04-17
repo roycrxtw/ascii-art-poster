@@ -250,9 +250,9 @@ span[data-info]:hover::before {
 
 .viewBody{
 	display: block;
-	width: 90%;
+	width: 95vw;
 	margin: auto;
-	border: 0px solid blue;
+	border: 0px solid yellow;
 	padding: 0px;
 	text-align: center;
 }
