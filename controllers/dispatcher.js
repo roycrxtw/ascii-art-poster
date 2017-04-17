@@ -222,7 +222,11 @@ router.get("/list", function(req, res, next){
 });
 
 router.get("/login", function(req, res, next){
-	res.render('login', {css: ['form']});
+	if(req.session.uid){
+		res.redirect(303, '/home');
+	}else{
+		res.render('login', {css: ['form']});
+	}
 });
 
 router.post('/login', function(req, res, next){
