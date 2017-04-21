@@ -26,7 +26,7 @@ function countPosts(criteria){
 			if(err){
 				return reject('db error');
 			}
-			console.log('[post-dao] count=', count);
+			console.log('[post-dao] countPosts()=', count);
 			return resolve(count);
 		});
 	});
@@ -114,17 +114,19 @@ function deletePost(postId){
  * Get n posts from database
  * @return {Promise<Array<post>>}
  */
-function listPosts(conditions, selection = ''){
+function listPosts(conditions){
 	console.log('[post-dao] listPosts(), conditions=', conditions);
-	console.log('[post-dao] listPosts(), selection=', selection);
 	
 	return new Promise( (resolve, reject) => {
-		if(!conditions.n){
-			conditions.n = MAX_RESULTS;
+		if(!conditions.limit){
+			conditions.limit = MAX_RESULTS;
 		}
-		var q = postModel.find(conditions.query).select(selection)
-				.sort({'created': -1}).limit(conditions.n).lean(true);
-		q.exec(function(err, docs){
+		var query = postModel.find(conditions.query)
+				.sort({'created': -1})
+				.skip(conditions.skip)
+				.limit(conditions.limit)
+				.lean(true);
+		query.exec(function(err, docs){
 			if(err){
 				errorHandler(err, 'err in db.');
 				return reject('db error');

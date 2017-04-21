@@ -252,14 +252,15 @@ span[data-info]:hover::before {
 	display: block;
 	width: 95vw;
 	margin: auto;
-	border: 0px solid yellow;
+	border: 0px solid red;
 	padding: 0px;
 	text-align: center;
 }
 @media only screen and (min-width: 1024px){
 	.viewBody{
+		position: relative;
 		width: 80vw;
-		margin-left: 18vw;
+		margin: 0 0 0 18vw;
 		padding: 0;
 	}
 }

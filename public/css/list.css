@@ -18,7 +18,7 @@
 .viewBody .post{
 	display: inline-block;
 	width: 90vw;
-	border: 1px solid gray;
+	border: 1px solid lightgrey;
 	border-radius: 5px;
 	background-color: snow;
 	margin: 0 0 1vh;
@@ -56,7 +56,7 @@
 	.post .category{
 		width: 5vw;
 		height: 5vw;
-		font-size: 1.8vw;
+		font-size: 1.7vw;
 	}
 }
 
@@ -104,9 +104,11 @@
 	height: 7vw;
 	padding: 10px;
 	border: 1px solid rgba(0, 0, 0, 0.1);
-	background-color: rgba(128, 178, 179, 0.8);
-	color: snow;
+/*	background-color: rgba(128, 178, 179, 0.8);*/
+	background-color: antiquewhite;
+	color: grey;
 	font-size: 4vw;
+	font-weight: 100;
 }
 @media only screen and (min-width: 1024px){
 	.post-title{
@@ -127,4 +129,131 @@
 .expired-post-note{
 	float: right;
 	font-style: italic;
+}
+
+/* page block */
+.block-page{
+	display: block;
+	position: relative;
+	width: 95vw;
+	border: 0px solid orange;
+	margin: auto;
+	overflow: hidden;
+}
+@media only screen and (min-width: 1024px){
+	.block-page{
+		width: 50vw;
+	}
+}
+
+.block-page .page-tile{
+	float: left;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 10px;
+	margin: 5px;
+	background-color: antiquewhite;
+	color: grey;
+	text-decoration: none;
+}
+@media only screen and (min-width: 1024px){
+	.block-page .page-tile{
+		height: 5vw;
+		padding: 10px;
+		margin: 2px;
+		background-color: antiquewhite;
+		color: grey;
+		font-size: 1.2vw;
+	}
+}
+
+.block-page .title{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	background-color: antiquewhite;
+	
+	color: grey;
+	font-size: 10vw;
+	font-weight: 100;
+}
+@media only screen and (min-width: 1024px){
+	.block-page .title{
+		float: left;
+		clear: both;
+		height: 5vw;
+		margin: 2px;
+		font-size: 2.5vw;
+		
+	}
+}
+
+.block-page .btn{
+	color: grey;
+	transition: all 500ms;
+}
+@media only screen and (min-width: 1024px){
+	.block-page .btn{
+		width: 5vw;
+		padding: 0;
+	}
+}
+
+.block-page .btn:hover{
+	background-color: lightgrey;
+	color: snow;
+	border-radius: 15px;
+/*	box-shadow: 0px 0px 3px 0px rgba(50, 50, 50, 0.58);*/
+}
+
+
+
+.block-page .page-number{
+	font-weight: 100;
+}
+@media only screen and (min-width: 1024px){
+	.block-page .page-number{
+		position: fixed;
+		right: 0;
+		top: 0;
+		width: 10vw;
+		height: 10vw;
+		margin: 0;
+		font-size: 2vw;
+		color: grey;
+		background-color: rgba(220, 220, 220, 0);
+	}
+}
+
+
+
+.block-page .page-info{
+	
+}
+@media only screen and (min-width: 1024px){
+	.block-page .page-info{
+		width: 10vw;
+		height: 5vw;
+	}
+}
+
+.block-page-info{
+	float: left;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	
+	margin: 1px;
+	padding: 10px;
+	
+}
+@media only screen and (min-width: 1024px){
+	.block-page-info{
+		margin: 5px;
+		padding: 0 10px;
+		height: 5vw;
+		font-size: 1.2vw;
+	}
 }

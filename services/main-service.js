@@ -4,7 +4,7 @@
 var conn = require('../dao/connection');
 var userDao = require('../dao/user-dao');
 var postDao = require('../dao/post-dao');
-var data = require('./expiryData');
+var serviceData = require('./service-data');
 var mainConfig = require('../config/main.config');
 
 var request = require('request');
@@ -12,34 +12,64 @@ var request = require('request');
 var log = log;
 var standardRejectMessage = '服務暫時無法使用，請稍後重試。';
 
+const PAGE_SIZE = 10;
+
+exports.getPostSettings = getPostSettings;
+
+// wrapper functions
 exports.about = about;
+exports.getUserInfo = getUserInfo;
+exports.queryPosts = queryPosts;
+
 exports.createAndLoginFbUser = createAndLoginFbUser;
 exports.createAndLoginGoogleUser = createAndLoginGoogleUser;
 exports.createAppUser = createAppUser;
 exports.deleteUser = deleteUser;
 exports.getUser = getUser;
-exports.getUserInfo = getUserInfo;
+
 exports.updateUserName = updateUserName;
 exports.login = login;
 exports.createPost = createPost;
 exports.getPost = getPost;
-exports.getPosts = getPosts;
-exports.getPostsByUser = getPostsByUser;
+
 exports.updatePost = updatePost;
 exports.deletePost = deletePost;
 exports.countPosts = countPosts;
 
-exports.test = test;
+function getPostSettings(){
+	console.log('getPostSettings()');
+	let data = {};
+	data.postCategory = serviceData.postCategory;
+	data.expiryTypes = serviceData.expiryTypes;
+	console.log('getPostSettings(), data.postCategory=', data.postCategory);
+	return data;
+}
 
+async function countPosts({uid, ignoreExpiry = false} = {}){
+	//let opt = (uid)? {'user.authId': uid}: {};
+	
+	try{
+		console.log('[service] countPosts(), uid=%s, ignoreExpiry=%s', uid, ignoreExpiry);
+		let opt = {};
+		
+		if(uid){
+			opt['user.authId'] = uid;
+		}
+		
+		if(!ignoreExpiry){
+			opt.expiry = {$gte: new Date()};
+		}
 
-function countPosts(uid){
-	return new Promise( (resolve, reject) => {
-		postDao.countPosts({'user.authId': uid}).then( (count) => {
-			return resolve(count);
-		}).catch( ex => {
-			return reject( standardRejectMessage );
-		});
-	});
+		console.log('[service] countPosts(), opt=', opt);
+
+	
+		let count = await postDao.countPosts(opt);
+		console.log('[service] countPosts() uid: %s=%s', uid, count);
+		return count;
+	}catch(ex){
+		console.log('[error] countPage(), ex:', ex);
+		return false;
+	}
 }
 
 /**
@@ -153,10 +183,6 @@ function log(msg, obj){
 	console.log('[serivce] %s, obj=%s', msg, obj);
 }
 
-function test(){
-	console.log('expiryData=', data.expiryData);
-}
-
 /**
  * Format date to yyyy/mm/dd-hh:mm
  * @param {Date} d A date object which will be format
@@ -208,41 +234,22 @@ function validateUserFields(user, opt){
 	return true;
 }
 
-/*
- * #need-review: Need to review the result of async-await syntax.
- * @return {nm$_main-service.about.main-serviceAnonym$2}
+
+/**
+ * 
+ * @return {result} object
  */
 async function about(){
 	try{
-		var userCount = await userDao.countUsers();
-		var postCount = await postDao.countPosts({});
-		var data = {userCount: userCount, postCount: postCount};
+		let result = {};
+		result.userCount = await userDao.countUsers();
+		result.postCount = await countPosts();
+		result.allPostCount = await countPosts({ignoreExpiry: true});
 		//console.log('[service] about: data=', data);
-		return data;
+		return result;
 	}catch(ex){
 		console.log(ex);
 	}
-	
-	/*
-	return new Promise( (resolve, reject) => {
-		var userCount = await userDao.countUsers();
-		
-		
-		
-		var userPromise = userDao.countUsers();
-		var postPromise = postDao.countPosts({});
-		
-		Promise.all([userPromise, postPromise]).then((values) => {
-			var data = {
-				userCount: values[0],
-				postCount: values[1]
-			};
-			resolve(data);
-		}).catch( (ex) => {
-			reject(standardRejectMessage);
-		});
-	});
-	*/
 }
 
 /**
@@ -279,7 +286,7 @@ function createPost(post){
 						name: post.uname
 					},
 					created: new Date(),	//date of created. new Date.toString()
-					expiry: new Date(new Date().getTime() + data.expiryData[post.expiry].offset),
+					expiry: new Date(new Date().getTime() + serviceData.expiryTypes[post.expiry].offset),
 					anonymous: post.ghost
 				};
 				console.log('preparedPost=', preparedPost);
@@ -366,104 +373,136 @@ function deleteUser(uid){
 //#todo-roy
 function getPost(postId){}
 
-function doGetPosts(conditions, selection = ''){
-	return new Promise( (resolve, reject) => {
-		postDao.listPosts(conditions, selection).then( (docs) => {
-			console.log('[service] docs.length', docs.length);
-			var d = new Date();
-			for(var i in docs){
-				console.log('tags=', docs[i].tags);
-				docs[i].postId = docs[i]._id;	// remap _id to postId
-				delete docs[i]._id;
-				if(docs[i].anonymous){
-					docs[i].user.authId = '0';
-					docs[i].user.name = '這是個忍者!';
-				}
-				delete docs[i].anonymous;
-				if(docs[i].category === undefined){
-					docs[i].category = '無';
-				}
-				docs[i].created = formatDate(docs[i].created);
-				if(docs[i].expiry){
-					if(docs[i].expiry < d){
-						docs[i].isExpired = true;
-					}
-					docs[i].expiry = formatDate(docs[i].expiry);
-				}
-				//console.log('[service] Modified doc[%s]=', i, docs[i]);
+async function doGetPosts(conditions){
+	console.log('[service] doGetPost(), conditions: ', conditions);
+	let posts = await postDao.listPosts(conditions);
+	console.log('[service] doGetPosts(): posts.length=', posts.length);
+	var d = new Date();
+	for(var i in posts){
+		//console.log('post[%s]=', i, posts[i]);
+		posts[i].postId = posts[i]._id;	// remap _id to postId
+		delete posts[i]._id;
+		
+		if(posts[i].anonymous){
+			posts[i].user.authId = '0';
+			posts[i].user.name = '這是個忍者!';
+		}
+		delete posts[i].anonymous;
+		
+		if(posts[i].category === undefined){
+			posts[i].category = '無';
+		}
+		posts[i].created = formatDate(posts[i].created);
+		if(posts[i].expiry){
+			if(posts[i].expiry < d){
+				posts[i].isExpired = true;
 			}
-			return resolve(docs);
-		}).catch( (ex) => {
-			console.log('[service] ', ex);
-			return reject('本服務出錯囉');
-		});
-	});
+			posts[i].expiry = formatDate(posts[i].expiry);
+		}
+		//console.log('[service] Modified doc[%s]=', i, docs[i]);
+	}
+	return posts;
 }
 
-function getPosts(limit){
-	var conditions = {
-		query: {
-			expiry: {$gt: new Date()}
-		},
-		n: (typeof limit === 'number')? limit: 20
-	};
-	return doGetPosts(conditions, '-expiry -__v');
+async function queryPosts({uid, pageNo = 1, pageSize} = {}){
+	pageNo = Number(pageNo);
+	pageSize = (pageSize >= PAGE_SIZE)? pageSize: PAGE_SIZE;
 	
-}
-
-function getPostsByUser(uid){
-	var conditions = {
+	let conditions = {
 		query: {
-			'user.authId': uid
+			//'user.authId': 'fb:1645788332105202',
+			//expiry: {$gt: new Date()}
 		},
-		n: 20
+		limit: pageSize
 	};
-	return doGetPosts(conditions);
+	if(uid){
+		conditions.query['user.authId'] = uid;
+	}else{
+		conditions.query.expiry = {$gt: new Date()};
+	}
+	
+	let postCount = await countPosts({
+		uid: uid, 
+		ignoreExpiry: (uid)? true: false
+	});
+	let pageCount = Math.ceil(postCount / pageSize);
+	
+	
+	if(isNaN(pageNo)){
+		console.log('pageNo is not a number');
+		pageNo = 1;
+	}
+	pageNo = (pageNo > pageCount)? pageCount: pageNo;
+	conditions.skip = (pageNo - 1) * pageSize;
+	
+	let result = {};
+	result.posts = await doGetPosts(conditions);
+	//#roy-todo: what to do if no any result?
+	result.currentPage = pageNo;
+	result.pageCount = pageCount;
+	result.postCount = postCount;
+	
+	// deal with pagination.
+	
+	result.page = {};
+	result.page.first = (pageNo === 1)? null: 1;
+	result.page.next = (pageNo < pageCount)? (pageNo + 1): null;
+	result.page.prev = (pageNo > 1)? (pageNo - 1): null;
+	result.page.last = (pageNo === pageCount)? null: pageCount;
+	return result;
 }
 
 /**
  * 
- * @param {object} user
- * @return {Promise}
+ * @param {type} uid
+ * @return {user|result} null if no such user
  */
-function getUser(uid){
-	return new Promise( (resolve, reject) => {
-		console.log('[service] getUser, uid=', uid);
-		if(uid === '0'){
-			return reject('這是個忍者!');
-		}
-		if(!validateUserFields({id: uid}, {id: true})){
-			console.error('不該有這個id:', uid);
-			return reject('不該有這個id');
-		}
-		userDao.findUserById(uid).then( (result) => {
-			console.log('[service] getUser(%s), result=', uid, result);
-			return resolve(result);
-		}).catch( (ex) => {
-			console.log('[service] dao error, ex=', ex);
-			return reject( standardRejectMessage );
-		});
-	});
+async function getUser(uid){
+	console.log('[service] getUser(%s)', uid);
+	
+	if(uid === '0'){
+		let result = {};
+		result.name = '這是個忍者';	//#roy-todo: need to test
+		return result;
+	}
+	
+	if(!validateUserFields({id: uid}, {id: true})){
+		console.error('不該有這個id:', uid);
+		let result = {};
+		result.name = '不該有這id';	//#roy-todo: need to test
+		return result;
+	}
+	
+	try{
+		let user = await userDao.findUserById(uid);
+		console.log('[service] getUser(%s)=', uid, user);
+		console.log('[service] getUser(): ok');
+		return user;
+	}catch(ex){
+		console.log('[service] dao error, ex=', ex);
+	}
 }
 
-function getUserInfo(uid){
-	return new Promise( (resolve, reject) => {
-		var userPromise = getUser(uid);
-		var postCountPromise = countPosts(uid);
-		
-		Promise.all([userPromise, postCountPromise]).then( values => {
-			var data = {
-				user: values[0],
-				postCount: values[1]
-			};
-			return resolve(data);
-		}).catch(ex => {
-			return reject( ex);
-		});
-		
-	});
-	
-	
+/**
+ * wrapper function.
+ * @param {string} uid User id
+ * @return {object} result User details, or false if the user doesn't exist.
+ */
+async function getUserInfo(uid){
+	try{
+		let result = {};
+		result.user = await getUser(uid);
+		console.log('[service] getUserInfo: result.user=', result.user);
+		if(!result.user){
+			console.log('No such user: %s', uid);
+			return false;
+		}
+		result.postCount = await countPosts({uid: uid});
+		result.allPostCount = await countPosts({uid: uid, ignoreExpiry: true});
+		return result;
+	}catch(ex){
+		console.log(ex);
+	}
 }
 
 /**

@@ -9,9 +9,9 @@
 	<label>顯示名稱:<input type='text' name='name' value='{{user.name}}' 
 			pattern='.{1, 20}' required title='最少須有一個字母'/></label>
 	<label>加入日期:<br/>{{user.created}}</label>
-	<label>文章總數:<input type='text' value='{{user.postCount}}' readonly /></label>
+	<label>文章總數:<input type='text' value='{{user.postCount}}/{{user.allPostCount}}' readonly /></label>
 	{{#if user.xauth}}<label>您是使用{{user.xauth}}服務註冊的使用者</label>{{/if}}
-	<label>帳號管理:<div class='btn-deleteUser'>刪除本帳號</div></label>
+	<label>帳號管理:<span class='btn-deleteUser'>刪除本帳號</span></label>
 	<input type='submit' value='更新' />
 </form>
 {{else}}

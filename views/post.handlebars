@@ -1,10 +1,19 @@
 
 <form class='form-grumbling' method="post" action="/post">
 <div class='form-title'>發個抱怨文</div>
+<div class='block-category'>
+<div class='item-category'>
+	文章分類
+	<select name='category'>
+	{{#each post.category}}
+		<option value="{{this}}">{{this}}</option>
+	{{/each}}
+	</select>
+</div>
+<div class='item-input'>
 <input type="text" name='title' value='{{post.title}}' 
-		placeholder="抱怨主題" required/>
-<input type="text" name='category' value='{{post.category}}' 
-		placeholder="文章分類" required  maxlength='2'/>
+	   placeholder="抱怨主題" required/></div>
+</div>
 <textarea id='fieldContent' name='content' placeholder="抱怨內容" 
 		required>{{post.content}}</textarea>
 <span data-info='設定文章消失時間'><label class='cbLabel'>

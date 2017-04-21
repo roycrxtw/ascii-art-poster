@@ -12,29 +12,7 @@ form:hover{
 	background-color: #f3d8a5;
 }
 
-input[name='category']{
-	width: 95%;
-	padding: 10px;
-	background-color: Moccasin  ;
-	outline: none;
-	border: 1px solid snow;
-	font-size: 18px;
-}
-input[name='category']:focus{
-	background-color: oldlace;
-}
 
-input[name='title']{
-	width: 95%;
-	padding: 10px;
-	background-color: Moccasin  ;
-	outline: none;
-	border: 1px solid snow;
-	font-size: 18px;
-}
-input[name='title']:focus{
-	background-color: oldlace;
-}
 
 select{
 	border: 0px solid red;
@@ -48,10 +26,10 @@ textarea{
 	height: 250px;
 	margin: auto;
 	padding: 15px;
-	font-size: 130%;
 	border: 2px solid snow;
 	background-color: Moccasin  ;
 	outline: none;
+	font-size: 1.4vw;
 	font-family: Courier New;
 }
 textarea:focus{
@@ -127,4 +105,54 @@ textarea:focus{
 .g-recaptcha{
 	margin: 10px auto;
 	width: 320px;
+}
+
+.block-category{
+	display: flex;
+	width: 95%;
+	margin: auto;
+	border: 0px solid snow;
+}
+
+.item-category{
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 4vw;
+	border: 0px solid red;
+	margin: 5px;
+	padding: 0 10px;
+	background-color: slategrey;
+	color: snow;
+	font-size: 1.25vw;
+}
+
+.item-category select{
+	font-size: 1.25vw;
+	padding: 10px 5px;
+	margin: 5px;
+	background-color: antiquewhite;
+	color: grey;
+}
+
+.item-input{
+	flex: 4;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border: 0px solid red;
+}
+
+input[name='title']{
+	width: 100%;
+	height: 4vw;
+	padding: 10px;
+	background-color: Moccasin  ;
+	outline: none;
+	border: 1px solid snow;
+	font-size: 1.4vw;
+}
+input[name='title']:focus{
+	background-color: oldlace;
 }

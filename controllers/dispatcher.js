@@ -10,6 +10,8 @@ var expiryData = require('../services/expiryData');
 var dataConfig = require('../data');
 var mainConfig = require('../config/main.config');
 
+const ERROR_MSG = '很抱歉，暫時無法提供此服務，請稍後再試。';
+
 router.use(function(req, res, next){
 	next();
 });
@@ -19,18 +21,9 @@ router.get(['/', '/home'], function(req, res, next){
 	res.render('home', {uid: req.session.uid, uname: req.session.uname});
 });
 
-
+//#roy-todo
 router.get('/api/list', function(req, res, next){
-	service.getPosts(5).then( (docs) => {
-		res.status(200).json({ posts: docs });
-	}).catch( () => {
-		res.sendStatus(404);
-	});
-});
-
-router.get('/delete', (req, res, next) => {
-	res.render('delete', {editable: true, uid: req.session.uid, uname: req.session.uname});
-	
+	//#roy-todo
 });
 
 router.get('/login/facebook',
@@ -113,21 +106,25 @@ router.post('/user', function(req, res, next){
 	}
 });
 
-router.get('/user/:id', function(req, res, next){
-	var data = {
+router.get('/user/:id', async function(req, res, next){
+	let data = {
 		css: ['form', 'user']
 	};
 	
-	service.getUserInfo(req.params.id).then( (doc) => {
-		if(!doc){
-			req.session.flash = '沒有這個使用者';
+	try{
+		let result = await service.getUserInfo(req.params.id);
+		if(!result){
+			req.session.flash = '抱歉，沒有這個使用者';
 			return res.redirect(303, '/home');
 		}
-		data.user = doc.user;
-		data.user.postCount = doc.postCount;
+	
+		data.user = result.user;
+		data.user.postCount = result.postCount;
+		data.user.allPostCount = result.allPostCount;
+		// further process if this user is loged in
 		if(req.params.id === req.session.uid){
 			data.editable = true;
-			var match = /^(app|google|fb):/.exec(doc.user.authId);
+			let match = /^(app|google|fb):/.exec(result.user.authId);
 			if(match[1] === 'fb'){
 				data.user.xauth = 'facebook';
 			}else if(match[1] === 'google'){
@@ -136,13 +133,12 @@ router.get('/user/:id', function(req, res, next){
 				data.user.xauth = '本web app';
 			}
 		}
-		
 		return res.render('user', data);
-	}).catch( ex => {
-		console.log('[service] ex=', ex);
-		data.flash = ex.toString();
+	}catch(ex){
+		console.log('[dispatcher] get>/user/%s error:', req.params.id, ex);
+		req.session.flash = ERROR_MSG;
 		res.render('user', data);
-	});
+	}
 });
 
 router.post('/user/:id', function(req, res, next){
@@ -150,7 +146,7 @@ router.post('/user/:id', function(req, res, next){
 		req.session.flash = '您沒有權限可以做這件事情';
 		return res.redirect(303, '/user/' + req.params.id);
 	}else{
-		var preparedUser = {
+		let preparedUser = {
 			authId: req.session.uid,
 			name: req.body.name
 		};
@@ -166,64 +162,59 @@ router.post('/user/:id', function(req, res, next){
 	}
 });
 
+router.get('/user/:id/list', function(req, res, next){
+	res.redirect(302, '/user/' + req.params.id + '/list/1');
+});
 
-
-router.get('/user/:id/posts', function(req, res, next){
+router.get('/user/:id/list/:pageNo', async function(req, res, next){
 	if(req.params.id !== req.session.uid){
+		req.session.flash = '您沒有權限做這件事情喔。';
 		return res.redirect(303, '/list');
-	}else{
-		service.getPostsByUser(req.session.uid).then( (docs) => {
-			var data = {};
-			if(docs === 0){
-				data = null;
-			}else{
-				data = {
-					post: docs,
-					owner: true,
-					css: ['list']
-				};
-			}
-			res.render('list', data);
-		}).catch( (ex) => {
-			req.session.flash = '很抱歉，暫時無法提供此服務，請稍後再試';
-			res.redirect(303, '/user');
+	}
+	
+	try{
+		let result = await service.queryPosts({
+			uid: req.session.uid,
+			pageNo: req.params.pageNo
 		});
+		res.locals.owner = true;
+		res.locals.path = '/user/' + req.session.uid + '/list';
+		res.locals.css = ['list'];
+		res.render('list', result);
+	}catch(ex){
+		console.log('error:', ex);
+		req.session.flash = ERROR_MSG;
+		res.redirect(303, '/user');
 	}
 });
 
-// first function apply async-await pattern
 router.get("/about", async function(req, res, next){
 	var data = await service.about();
 	return res.render('about', data);
-
-	/*
-	service.about().then((result) => {
-		var data = {
-			postCount: result.postCount,
-			userCount: result.userCount
-		};
-		return res.render('about', data);
-	}).catch( (ex) => {
-		return res.render('about');
-	});
-	*/
 });
 
-router.get("/list", function(req, res, next){
-	service.getPosts().then( (docs) => {
-		var data = {
-			post: docs
-		};
+router.get('/list', (req, res, next) => {
+	res.redirect(303, '/list/1');
+});
+
+
+router.get('/list/:pageNo', async function(req, res, next){
+	console.log('get>/list. :pageNo=', req.params.pageNo);
+	try{
+		let result = await service.queryPosts({pageNo: req.params.pageNo});
+		res.locals.path = '/list';
 		res.locals.css = ['list'];
-		res.render('list', data);
-	}).catch( () => {
+		res.render('list', result);
+		console.log('after render');
+	}catch(ex){
+		console.log('ex in get>/list:%s:', req.params.pageNo, ex);
 		res.render('list');
-	});
+	}
 });
 
 router.get("/login", function(req, res, next){
 	if(req.session.uid){
-		res.redirect(303, '/home');
+		res.redirect(303, '/list');
 	}else{
 		res.render('login', {css: ['form']});
 	}
@@ -270,22 +261,24 @@ router.get('/post', function(req, res, next){
 		req.session.flash = '請先登入';
 		return res.redirect(303, '/login');
 	}
-	var data = {
+	let postSettings = service.getPostSettings();
+	let data = {
 		post: {
 			title: req.body.title,
 			content: '',
-			expiry: expiryData.expiryData,
+			category: postSettings.postCategory,
+			expiry: postSettings.expiryTypes,
 			ghost: false
 		},
-		css: ['form', 'post-form'],
 		recaptchaSiteKey: mainConfig.recaptchaSiteKey,
 		scripts: ['<script src="https://www.google.com/recaptcha/api.js" async defer></script>']
 	};
+	res.locals.css = ['form', 'post-form'];
 	res.render('post', data);
 });
 
 router.post('/post', function(req, res, next){
-	var post = {
+	let post = {
 		title: req.body.title,
 		category: req.body.category,
 		content: req.body.content,
@@ -300,10 +293,11 @@ router.post('/post', function(req, res, next){
 	}
 	service.createPost(post).then( ()=> {
 		req.session.flash = '發表完成。';
-		res.redirect(303, '/list');
+		res.redirect(303, '/list/1');
 	}).catch( (ex) => {
+		// #roy-todo: Maybe it should use redirect than res.render directly.
 		post.expiry = expiryData.expiryData;
-		var data = {
+		let data = {
 			post: post,
 			css: ['form', 'post-form'],
 			scripts: ['<script src="https://www.google.com/recaptcha/api.js" async defer></script>'],
@@ -336,10 +330,10 @@ router.post("/register", function(req, res, next){
 	}).catch( (ex) => {
 		console.log('[dispatcher] newUser() is failed. ex=', ex);
 		var data = {
-			user: user,
-			flash: ex.toString(),
-			css: ['form']
+			user: user
 		};
+		res.locals.flash = '請重試';
+		res.locals.css = ['form'];
 		res.render('register', data);
 	});
 });
