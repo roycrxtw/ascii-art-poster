@@ -118,7 +118,7 @@ function deletePost(postId){
 function listPosts(conditions){
 	log.info({conditions: conditions}, 'listPosts() start');
 	return new Promise( (resolve, reject) => {
-		let query = postModel.find(conditions.query)
+		let query = postModel.find(conditions.query, conditions.projection)
 				.sort({'created': -1})
 				.skip(conditions.skip)
 				.limit(conditions.limit)
@@ -128,6 +128,7 @@ function listPosts(conditions){
 				log.error({error: err}, 'Error in listPosts().');
 				return reject('error');
 			}
+			log.debug({docs: docs}, 'listPosts() Print docs.');
 			return resolve(docs);
 		});
 	});

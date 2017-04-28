@@ -8,7 +8,7 @@ var serviceData = require('./service-data');
 var mainConfig = require('../config/main.config');
 
 var request = require('request');
-let debug = require('debug')('service');
+let debug = require('debug')('main-service');
 
 const LOG_LEVEL = require('../config/main.config').LOG_LEVEL;
 let bunyan = require('bunyan');
@@ -407,6 +407,9 @@ async function doGetPosts(conditions){
 
 async function queryPosts({uid, pageNo = 1, pageSize} = {}){
 	pageNo = Number(pageNo);
+	if(isNaN(pageNo)){
+		pageNo = 1;
+	}
 	pageSize = (pageSize >= PAGE_SIZE)? pageSize: PAGE_SIZE;
 	
 	let conditions = {
@@ -419,37 +422,38 @@ async function queryPosts({uid, pageNo = 1, pageSize} = {}){
 	if(uid){
 		conditions.query['user.authId'] = uid;
 	}else{
+		conditions.projection = {expiry: 0};
 		conditions.query.expiry = {$gt: new Date()};
 	}
 	
-	let postCount = await countPosts({
-		uid: uid, 
-		ignoreExpiry: (uid)? true: false
-	});
-	let pageCount = Math.ceil(postCount / pageSize);
-	
-	
-	if(isNaN(pageNo)){
-		console.log('pageNo is not a number');
-		pageNo = 1;
+	try{
+		let postCount = await countPosts({
+			uid: uid, 
+			ignoreExpiry: (uid)? true: false
+		});
+		let pageCount = Math.ceil(postCount / pageSize);
+		
+		pageNo = (pageNo > pageCount)? pageCount: pageNo;
+		conditions.skip = (pageNo - 1) * pageSize;
+		
+		let result = {};
+		result.posts = await doGetPosts(conditions);
+		//#roy-todo: what to do if no any result?
+		result.currentPage = pageNo;
+		result.pageCount = pageCount;
+		result.postCount = postCount;
+
+		// deal with pagination.
+		result.page = {};
+		result.page.first = (pageNo === 1)? null: 1;
+		result.page.next = (pageNo < pageCount)? (pageNo + 1): null;
+		result.page.prev = (pageNo > 1)? (pageNo - 1): null;
+		result.page.last = (pageNo === pageCount)? null: pageCount;
+		return result;
+	}catch(ex){
+		log.error({error: ex.stack}, 'Error in queryPosts()');
+		return false;
 	}
-	pageNo = (pageNo > pageCount)? pageCount: pageNo;
-	conditions.skip = (pageNo - 1) * pageSize;
-	
-	let result = {};
-	result.posts = await doGetPosts(conditions);
-	//#roy-todo: what to do if no any result?
-	result.currentPage = pageNo;
-	result.pageCount = pageCount;
-	result.postCount = postCount;
-	
-	// deal with pagination.
-	result.page = {};
-	result.page.first = (pageNo === 1)? null: 1;
-	result.page.next = (pageNo < pageCount)? (pageNo + 1): null;
-	result.page.prev = (pageNo > 1)? (pageNo - 1): null;
-	result.page.last = (pageNo === pageCount)? null: pageCount;
-	return result;
 }
 
 /**
