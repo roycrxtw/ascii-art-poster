@@ -2,6 +2,16 @@
 // The data access object of Post collection 
 
 'use strict';
+
+const LOG_LEVEL = require('../config/main.config').LOG_LEVEL;
+var log = require('bunyan').createLogger({
+	name: 'post-dao',
+	streams: [{
+		level: LOG_LEVEL,
+		path: 'log/grumbler.log'
+	}]
+});
+
 var postModel = require('../models/post');
 
 const MAX_RESULTS = 30;
@@ -15,18 +25,18 @@ exports.deletePost = deletePost;
 exports.countPosts = countPosts;
 
 /**
- * 
+ * Get post counts.
  * @param {object} criteria Conditions for query
  * @return {Promise<number>} Resolve: a post count for the criteria argument.
  */
 function countPosts(criteria){
-	console.log('[post-dao] countPosts(), criteria=', criteria);
+	log.info({criteria: criteria}, 'countPost()');
 	return new Promise( (resolve, reject) => {
 		postModel.count(criteria, function(err, count){
 			if(err){
-				return reject('db error');
+				log.error({error: err}, 'Error in countPosts()');
+				return reject('error');
 			}
-			console.log('[post-dao] countPosts()=', count);
 			return resolve(count);
 		});
 	});
@@ -35,32 +45,22 @@ function countPosts(criteria){
 /**
  * Save a post to database
  * @param {object} post
- * @return {Promise<true|error>} Resolve the new created doc.
+ * @return {Promise<true|error>} Resolve true if creation success. Or reject
+ * error if something wrong.
  */
 function createPost(post){
 	return new Promise(function(resolve, reject){
 		new postModel(post).save(function(err, doc){
 			if(err){
-				errorHandler(err, 'createPost.save()');
-				return reject('error in database process.');
+				log.error({error: err}, 'Error in createPost()');
+				return reject('error');
 			}
-			if(doc){
-				console.log('doc created.');
-				return resolve(true);
-			}else{
-				errorHandler(err, 'Doc should not be null');
-				return reject('null doc');
-			}
+			log.info('createPost() success.');
+			return resolve(true);
 		});
 	});
 }
 
-function errorHandler(ex, msg){
-	console.error('[post-dao] error in database process:', msg);
-	if(ex){
-		console.log(ex.toString);
-	}
-}
 
 /**
  * Read a post from database.
@@ -68,16 +68,15 @@ function errorHandler(ex, msg){
  * @return {Promise<post|error>} Resolve retrieved doc, or null if no any result.
  */
 function readPost(postId){
-	return new Promise( (resolve, reject)=>{
+	return new Promise( (resolve, reject) => {
 		if(typeof postId !== 'string'){
-			errorHandler(null, 'postId should be a string.');
-			return reject('Post id is invalid.');
+			throw new TypeError('postId should be a string.');
 		}
 		
 		postModel.findOne({_id: postId}, function(err, doc){
 			if(err){
-				errorHandler(err, 'readPost()');
-				return reject('database error');	//#todo-roy: more specific msg?
+				log.error({error: err, postId: postId}, 'Error in readPost()');
+				return reject('error');
 			}
 			console.log('[post-dao] Return the result=', doc);
 			return resolve(doc);
@@ -92,44 +91,42 @@ function readPost(postId){
  */
 function deletePost(postId){
 	return new Promise( (resolve, reject) => {
-		// 不做validation，只做基本確認uid是String
-		if(typeof postId !== 'string') return reject('postId is not a string.');
+		if(typeof postId !== 'string'){
+			throw new TypeError('postId should be a string.');
+		}
 		
 		postModel.findOneAndRemove({_id: postId}, function(err, doc){
 			if(err){
-				errorHandler(err, 'deletePost()');
-				return reject('dao error');
+				log.error({error: err, postId: postId}, 'Error in deletePost()');
+				return reject('error');
 			}
 			if(doc){
+				log.info('deletePost() success.');
 				return resolve(true);
 			}else{
-				console.log('[post-dao] Delete failed, no such post.');
-				return reject('No such post');
+				log.info({doc: doc}, 'deletePost() result is null');
+				return reject('No such post');		//#roy-todo: need some test.
 			}
 		});
 	});
 }
 
 /**
- * Get n posts from database
+ * Get posts from database
  * @return {Promise<Array<post>>}
  */
 function listPosts(conditions){
-	console.log('[post-dao] listPosts(), conditions=', conditions);
-	
+	log.info({conditions: conditions}, 'listPosts() start');
 	return new Promise( (resolve, reject) => {
-		if(!conditions.limit){
-			conditions.limit = MAX_RESULTS;
-		}
-		var query = postModel.find(conditions.query)
+		let query = postModel.find(conditions.query)
 				.sort({'created': -1})
 				.skip(conditions.skip)
 				.limit(conditions.limit)
 				.lean(true);
 		query.exec(function(err, docs){
 			if(err){
-				errorHandler(err, 'err in db.');
-				return reject('db error');
+				log.error({error: err}, 'Error in listPosts().');
+				return reject('error');
 			}
 			return resolve(docs);
 		});
@@ -143,21 +140,21 @@ function listPosts(conditions){
  * @return {Promise<true|error>} Promise resolve true if update success.
  */
 function updatePost(criteria, post){
+	log.info({criteria: criteria, post: post}, 'updatePost() start.');
 	return new Promise( (resolve, reject) => {
 		// Remember: DAO does not validate user data
 		// You should do it in the service layer.
-		//postModel.findOneAndUpdate(criteria, post, function(err, doc){
+		//postModel.findOneAndUpdate(criteria, post, function(err, doc){});
 		postModel.update(criteria, post, {multi: true}, function(err, doc){
 			if(err){
-				errorHandler(err, 'updatePost()');
-				return reject('dao-error');
+				log.error({error: err}, 'updatePost()');
+				return reject('error');
 			}
-			console.log('[post-dao] updatePost(), doc=', doc);
 			if(doc){
-				console.log('updatePost() success.');
+				log.info('updatePost() success.');
 				return resolve(true);
 			}else{
-				console.log('[post-dao] Doc is null after updatePost()');
+				log.info('updatePost() has some problem.');		//#roy-todo: need test
 				return reject('failed');
 			}
 		});

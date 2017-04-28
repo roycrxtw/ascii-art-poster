@@ -3,3 +3,4 @@ config/
 doc/
 node_modules/
 .netbeans.xml
+log/

@@ -4,19 +4,27 @@
 var express = require('express'),
 	router = express.Router();
 
+const LOG_LEVEL = require('../config/main.config').LOG_LEVEL;
+var log = require('bunyan').createLogger({
+	name: 'dispatcher',
+	streams: [{
+		level: LOG_LEVEL,
+		path: 'log/grumbler.log'
+	}]
+});
+
 var passport = require('passport');
 var service = require('../services/main-service');
 var expiryData = require('../services/expiryData');
-var dataConfig = require('../data');
+var config = require('./config.js');
 var mainConfig = require('../config/main.config');
-
-const ERROR_MSG = '很抱歉，暫時無法提供此服務，請稍後再試。';
 
 router.use(function(req, res, next){
 	next();
 });
 
 router.get(['/', '/home'], function(req, res, next){
+	log.info({uid: req.session.uid, uname: req.session.uname}, 'Request get>/home');
 	res.locals.css = ['home'];
 	res.render('home', {uid: req.session.uid, uname: req.session.uname});
 });
@@ -47,7 +55,8 @@ router.get('/login/facebook/return',
 		req.session.flash = '成功登入';
 		res.redirect(303, '/');
 	}).catch(ex => {
-		req.session.flash = ex.toString();
+		log.error({error: ex.stack}, 'Error in get>/login/facebook/return');
+		req.session.flash = config.msg.error;
 		res.redirect(303, '/');
 	});
 });
@@ -73,8 +82,8 @@ router.get('/login/google/return',
 		req.session.flash = '成功登入';
 		res.redirect(303, '/');
 	}).catch(ex => {
-		console.log('[dispatcher] get>/login/google/return, ex=', ex);
-		req.session.flash = dataConfig.standardFlashMessage;
+		log.error({error: ex.stack}, 'get>/login/google/return');
+		req.session.flash = config.msg.error;
 		res.redirect(303, '/');
 	});
 });
@@ -87,22 +96,24 @@ router.get('/user', function(req, res, next){
 	return res.redirect(303, '/user/' + req.session.uid);
 });
 
-router.post('/user', function(req, res, next){
+router.post('/user', async function(req, res, next){
 	if(req.session.uid !== req.body.authId){
 		req.session.flash = '不該這樣做喔';
 		return res.redirect(303, '/home');
 	}
 	if(req.body.action === 'delete'){
-		service.deleteUser(req.session.uid).then( (ex) => {
+		try{
+			let flag = await service.deleteUser(req.session.uid);
+
 			req.session.flash = '成功刪除帳號。';
 			req.session.uid = null;
 			req.session.uname = null;
 			return res.sendStatus(200);
-		}).catch( (ex) => {
-			console.log('[dispatcher] post>/user ex=', ex);
-			req.session.flash = dataConfig.standardFlashMessage;
-			return res.sendStatus(303);
-		});
+		}catch(ex){
+			log.error({error: ex.stack}, 'Error in Post request to /user');
+			req.session.flash = config.msg.error;
+			return res.sendStatus(303);	//#roy-todo: why send 303?
+		}
 	}
 });
 
@@ -135,30 +146,36 @@ router.get('/user/:id', async function(req, res, next){
 		}
 		return res.render('user', data);
 	}catch(ex){
-		console.log('[dispatcher] get>/user/%s error:', req.params.id, ex);
-		req.session.flash = ERROR_MSG;
+		log.error({error: ex.stack, uid: req.params.id}, 'error in get>/user/:id');
+		req.session.flash = config.msg.error;
 		res.render('user', data);
 	}
 });
 
-router.post('/user/:id', function(req, res, next){
+router.post('/user/:id', async function(req, res, next){
 	if(req.params.id !== req.session.uid){
-		req.session.flash = '您沒有權限可以做這件事情';
+		req.session.flash = config.msg.noAuthority;
 		return res.redirect(303, '/user/' + req.params.id);
-	}else{
+	}
+	
+	try{
 		let preparedUser = {
 			authId: req.session.uid,
 			name: req.body.name
 		};
-	
-		service.updateUserName(preparedUser).then( (doc) => {
+		
+		let result = await service.updateUserName(preparedUser);
+		if(result.ok){
 			req.session.uname = req.body.name;
 			req.session.flash = '更新成功囉';
-		}).catch( (ex) => {
-			req.session.flash = '更新失敗，請再試看看。';
-		}).then(() =>{
-			return res.redirect(303, '/user/' + req.params.id);
-		});
+		}else{
+			req.session.flash = result.msg;
+		}
+		return res.redirect(303, '/user/' + req.params.id);
+	}catch(ex){
+		log.error({error: ex.stack}, 'Error in post>/user/:id');
+		req.session.flash = '更新失敗，請再試看看。';
+		return res.redirect(303, '/user/' + req.params.id);
 	}
 });
 
@@ -168,7 +185,7 @@ router.get('/user/:id/list', function(req, res, next){
 
 router.get('/user/:id/list/:pageNo', async function(req, res, next){
 	if(req.params.id !== req.session.uid){
-		req.session.flash = '您沒有權限做這件事情喔。';
+		req.session.flash = config.msg.noAuthority;
 		return res.redirect(303, '/list');
 	}
 	
@@ -182,8 +199,12 @@ router.get('/user/:id/list/:pageNo', async function(req, res, next){
 		res.locals.css = ['list'];
 		res.render('list', result);
 	}catch(ex){
-		console.log('error:', ex);
-		req.session.flash = ERROR_MSG;
+		log.error({
+			error: ex.stack, 
+			id: req.params.id, 
+			pageNo: req.params.pageNo
+		}, 'Error in get>/user/:id/list/:pageNo');
+		req.session.flash = config.msg.error;
 		res.redirect(303, '/user');
 	}
 });
@@ -199,28 +220,35 @@ router.get('/list', (req, res, next) => {
 
 
 router.get('/list/:pageNo', async function(req, res, next){
-	console.log('get>/list. :pageNo=', req.params.pageNo);
+	log.info({pageNo: req.params.pageNo}, 'Request to get>/list/:pageNo');
 	try{
 		let result = await service.queryPosts({pageNo: req.params.pageNo});
 		res.locals.path = '/list';
 		res.locals.css = ['list'];
 		res.render('list', result);
-		console.log('after render');
+		log.info({resultPostCount: result.postCount}, 'get>/list/:pageNo end');
 	}catch(ex){
-		console.log('ex in get>/list:%s:', req.params.pageNo, ex);
+		log.error({error: ex.stack}, 'Error in get>/list/:pageNo');
 		res.render('list');
 	}
 });
 
 router.get("/login", function(req, res, next){
+	log.debug('Request get>/login started.');
 	if(req.session.uid){
-		res.redirect(303, '/list');
-	}else{
-		res.render('login', {css: ['form']});
+		return res.redirect(303, '/list');
 	}
+
+	if(req.session.fields){
+		res.locals.account = req.session.fields.account;
+		delete req.session.fields;
+	}
+	res.render('login', {css: ['form']});
+	
 });
 
-router.post('/login', function(req, res, next){
+router.post('/login', async function(req, res, next){
+	log.debug('Request post>/login started.');
 	let user = {
 		account: req.body.account,
 		password: req.body.password
@@ -229,22 +257,28 @@ router.post('/login', function(req, res, next){
 	if(req.session.uid){
 		res.redirect(303, '/home');
 	}
-	
-	service.login(user).then(function(user){
-		req.session.flash = 'Login success. Welcome to Grumblers!';
-		req.session.uid = user.id;
-		req.session.uname = user.name;
-		res.redirect(303, '/home');
-	}).catch(function(e){
-		console.log('[dispatcher] promise catched');
-		if(typeof e === 'string'){
-			user.flash = e;
-		}else{
-			// check database callback first.
+	try{
+		let result = await service.login(user);
+		if(result.failed){
+			// login failed
+			req.session.flash = result.failed;
+			req.session.fields = {
+				account: req.body.account
+			};
+			log.debug({fields: req.session.fields}, 'post>/login: login failed. Redirect to /login.');
+			return res.redirect(303, '/login');
 		}
+		
+		req.session.flash = 'Login success. Welcome to Grumblers!';
+		req.session.uid = result.id;
+		req.session.uname = result.name;
+		res.redirect(303, '/home');
+	}catch(ex){
+		log.error({error: ex.stack}, 'Error in post>/login');
+		user.flash = config.msg.error;
 		user.css = ['form'];
 		res.render('login', user);
-	});
+	}
 });
 
 router.get("/logout", function(req, res, next){
@@ -265,7 +299,7 @@ router.get('/post', function(req, res, next){
 	let data = {
 		post: {
 			title: req.body.title,
-			content: '',
+			content: 'content here',	//#roy-todo: need to remove after test.
 			category: postSettings.postCategory,
 			expiry: postSettings.expiryTypes,
 			ghost: false
@@ -291,10 +325,12 @@ router.post('/post', function(req, res, next){
 		post.uid = req.session.uid;
 		post.uname = req.session.uname;
 	}
+	
 	service.createPost(post).then( ()=> {
 		req.session.flash = '發表完成。';
 		res.redirect(303, '/list/1');
-	}).catch( (ex) => {
+	}).catch( ex => {
+		log.error({error: ex.stack}, 'Error in post>/post');
 		// #roy-todo: Maybe it should use redirect than res.render directly.
 		post.expiry = expiryData.expiryData;
 		let data = {
@@ -327,8 +363,8 @@ router.post("/register", function(req, res, next){
 		req.session.uid = doc.authId;
 		req.session.uname = doc.name;
 		res.redirect(303, '/register-done');
-	}).catch( (ex) => {
-		console.log('[dispatcher] newUser() is failed. ex=', ex);
+	}).catch( ex => {
+		log.error({error: ex.stack}, 'Eror in post>/register');
 		var data = {
 			user: user
 		};

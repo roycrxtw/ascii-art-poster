@@ -8,8 +8,18 @@ var serviceData = require('./service-data');
 var mainConfig = require('../config/main.config');
 
 var request = require('request');
+let debug = require('debug')('service');
 
-var log = log;
+const LOG_LEVEL = require('../config/main.config').LOG_LEVEL;
+let bunyan = require('bunyan');
+let log = bunyan.createLogger({
+	name: 'main-service',
+	streams: [{
+		level: LOG_LEVEL,
+		path: 'log/grumbler.log'
+	}]
+});
+
 var standardRejectMessage = '服務暫時無法使用，請稍後重試。';
 
 const PAGE_SIZE = 10;
@@ -25,31 +35,26 @@ exports.createAndLoginFbUser = createAndLoginFbUser;
 exports.createAndLoginGoogleUser = createAndLoginGoogleUser;
 exports.createAppUser = createAppUser;
 exports.deleteUser = deleteUser;
-exports.getUser = getUser;
 
 exports.updateUserName = updateUserName;
 exports.login = login;
+
 exports.createPost = createPost;
 exports.getPost = getPost;
-
 exports.updatePost = updatePost;
 exports.deletePost = deletePost;
 exports.countPosts = countPosts;
 
 function getPostSettings(){
-	console.log('getPostSettings()');
 	let data = {};
 	data.postCategory = serviceData.postCategory;
 	data.expiryTypes = serviceData.expiryTypes;
-	console.log('getPostSettings(), data.postCategory=', data.postCategory);
 	return data;
 }
 
 async function countPosts({uid, ignoreExpiry = false} = {}){
-	//let opt = (uid)? {'user.authId': uid}: {};
-	
+	log.debug({uid: uid, ignoreExpiry: ignoreExpiry}, 'countPosts() start.');
 	try{
-		console.log('[service] countPosts(), uid=%s, ignoreExpiry=%s', uid, ignoreExpiry);
 		let opt = {};
 		
 		if(uid){
@@ -59,16 +64,14 @@ async function countPosts({uid, ignoreExpiry = false} = {}){
 		if(!ignoreExpiry){
 			opt.expiry = {$gte: new Date()};
 		}
-
-		console.log('[service] countPosts(), opt=', opt);
-
+		log.debug({opt: opt}, 'countPost(): print opt');
 	
 		let count = await postDao.countPosts(opt);
-		console.log('[service] countPosts() uid: %s=%s', uid, count);
+		log.debug('countPosts()=%s', count);
 		return count;
 	}catch(ex){
-		console.log('[error] countPage(), ex:', ex);
-		return false;
+		log.error({error: ex.stack}, 'Error in countPage()');
+		return -1;
 	}
 }
 
@@ -76,16 +79,16 @@ async function countPosts({uid, ignoreExpiry = false} = {}){
  * To create and/or login Facebook user. The argument is a profile object 
  * parsed by passport-facebook module.
  * @param {Object} profile object. Parsed by passport-facebook module.
- * @return {Object} A promise object.
+ * @return {Object} A promise object. Resolve a user object if creation success. 
  */
 function createAndLoginFbUser(profile){
 	return new Promise( (resolve, reject) => {
-		console.log('[service] createAndLoginFbUser(), fb-id=', profile.id);
-		var authId = 'fb:' + profile.id;
+		log.debug({profile: profile}, 'createAndLoginFbUser()');
+		let authId = 'fb:' + profile.id;
 		
 		getUser(authId).then( (doc) => {
 			if(doc){
-				console.log('The facebook user is exist. Updating user name.');
+				log.debug('The facebook user is exist. Return user doc directly.');
 				return resolve(doc);
 			}else{
 				var preparedUser = {
@@ -101,13 +104,13 @@ function createAndLoginFbUser(profile){
 				doCreateUser(preparedUser).then( (doc) => {
 					return resolve(doc);
 				}).catch( ex => {
-					console.log('[service] createAndLoginFbUser, ex=', ex);
-					return reject('暫時無法為您服務，請稍後再試。');
+					log.error({error: ex.stack}, 'Error in createAndLoginFbUser(): create user');
+					return reject('error');
 				});
 			}
-		}).catch( (ex) => {
-			console.log('[service] ex', ex);
-			return  reject('暫時無法為您服務，請稍後再試。');
+		}).catch( ex => {
+			log.error({error: ex.stack}, 'Error in createAndLoginFbUser(): get user.');
+			return  reject('error');
 		});
 	});
 }
@@ -120,15 +123,15 @@ function createAndLoginFbUser(profile){
  */
 function createAndLoginGoogleUser(profile){
 	return new Promise( (resolve, reject) => {
-		console.log('[service] createAndLoginGoogleUser(), google-id=', profile.id);
-		var authId = 'google:' + profile.id;
+		log.debug({'profile.id': profile.id}, 'createAndLoginGoogleUser() start');
+		let authId = 'google:' + profile.id;
 		
-
-		getUser(authId).then( (doc) => {
+		getUser(authId).then( doc => {
 			if(doc){
+				log.debug('The facebook user is exist. Return user doc directly.');
 				return resolve(doc);
 			}else{
-				var preparedUser = {
+				let preparedUser = {
 					authId: authId,
 					name: profile.displayName || profile['_json'].name,
 					password: null,
@@ -141,16 +144,15 @@ function createAndLoginGoogleUser(profile){
 				doCreateUser(preparedUser).then( (doc) => {
 					return resolve(doc);
 				}).catch( ex => {
-					console.log('[service] createAndLoginGoogleUser, ex=', ex);
-					return reject( standardRejectMessage );
+					log.error({error: ex.stack}, 'Error in createAndLoginGoogleUser: create user');
+					return reject('error');
 				});
 			}
 		}).catch( (ex) => {
-			console.log('[service] ex', ex);
-			return  reject( standardRejectMessage );
+			log.error({error: ex.stack}, 'Error in createAndLoginGoogleUser(): get user');
+			return  reject('error');
 		});
 	});
-
 }
 
 /**
@@ -160,7 +162,7 @@ function createAndLoginGoogleUser(profile){
  */
 function createAppUser(user){
 	return new Promise(function(resolve, reject){
-		var preparedUser = {
+		let preparedUser = {
 			authId: 'app:' + user.account,
 			name: user.name,
 			password: user.password,
@@ -177,10 +179,6 @@ function createAppUser(user){
 			return reject(ex);
 		});
 	});
-}
-
-function log(msg, obj){
-	console.log('[serivce] %s, obj=%s', msg, obj);
 }
 
 /**
@@ -214,8 +212,7 @@ function validateUserFields(user, opt){
 			pwd: opt.password || false
 		};
 	}
-	console.log('[service] validateUserFields()=', user);
-	console.log('[service] validation opt=', check);
+	log.debug({user: user, check: check}, 'validateUserFields() start');
 	var idPattern = /^(app|google|fb):[a-zA-Z0-9_-]{6,}[^_-]$/;
 	var pwdPattern = /^[a-zA-Z0-9]{8,30}$/;
 	// this email pattern is according to the w3c design
@@ -225,7 +222,7 @@ function validateUserFields(user, opt){
 	var idResult = idPattern.test(user.authId);
 	var pwdResult = pwdPattern.test(user.password);
 	var emailResult = emailPattern.test(user.email);
-	console.log('User data validate results: id=%s, pwd=%s, email=', 
+	log.debug('User data validate results: id=%s, pwd=%s, email=', 
 			idResult, pwdResult, emailResult);
 
 	if(check.authId && !idResult) return false;
@@ -245,10 +242,10 @@ async function about(){
 		result.userCount = await userDao.countUsers();
 		result.postCount = await countPosts();
 		result.allPostCount = await countPosts({ignoreExpiry: true});
-		//console.log('[service] about: data=', data);
+		log.debug({result: result}, 'about() finished.');
 		return result;
 	}catch(ex){
-		console.log(ex);
+		log.error({error: ex.stack}, 'Error in about().');
 	}
 }
 
@@ -259,7 +256,7 @@ async function about(){
  */
 function createPost(post){
 	return new Promise( (resolve, reject) => {
-		console.log('[service] createPost(), post=', post);
+		log.debug({post: post}, 'createPost() started.');
 		
 		// verify the google re-captcha
 		var recaptchaOptions = {
@@ -270,9 +267,11 @@ function createPost(post){
 			}
 		};
 		
+		log.trace({recaptchaOpt: recaptchaOptions}, 'createPost(): Print recaptchaOptions');
+		
 		request.post(recaptchaOptions, function (error, response, body) {
 			if(error){
-				console.log('error=', error);
+				log.error({error: error, errorStack: error.stack}, 'Error in recaptcha verification.');
 				return reject('Google re-captcha error.');
 			}
 			var verifyResult = JSON.parse(body);
@@ -289,23 +288,20 @@ function createPost(post){
 					expiry: new Date(new Date().getTime() + serviceData.expiryTypes[post.expiry].offset),
 					anonymous: post.ghost
 				};
-				console.log('preparedPost=', preparedPost);
+				log.trace({preparedPost: preparedPost}, 'createPost(): Print preparedPost');
 				postDao.createPost(preparedPost).then( ()=> {
 					return resolve('ok');
-				}).catch( (ex) => {
-					return reject('文章發表失敗，請重新再試');
+				}).catch( ex => {
+					log.error({error: ex.stack}, 'Error in createPost()');
+					return reject('error');
 				});
 			}else{
-				console.log('Google re-captcha check is failed.');
+				log.info('Google re-captcha check is failed.');		//#roy-todo: check the google doc
 				return reject('Google re-captcha is invalid...');
 			}
 		});
-		
-		
-		
 	});
 }
-
 
 
 /**
@@ -315,41 +311,49 @@ function createPost(post){
  */
 function doCreateUser(user){
 	return new Promise(function(resolve, reject){
-		console.log('[service] doCreateUser(), user=', user);
-		userDao.findUserById(user.authId).then(function(doc){
-			if(doc){ return reject('本帳號已存在，請重新設定'); }
+		log.debug({user: user}, 'doCreateUser() started.');
+		
+		// #roy-todo: 在呼叫doCreateUser()之前其實就已經確認過user是否存在.
+		// 那麼在doCreateUser裡面是否要再確認一次?
+		// 確認pros: 安全
+		// cons: 重複.
+		
+		//那如果把確認user是否存在的工作交給doCreateUser做，是否ok?
+		//應從work flow去區分各個function之作用為何!
+		userDao.findUserById(user.authId).then(doc => {
+			if(doc){ return reject('本帳號已存在，請重新設定'); }	//#roy-todo: reject should not as flow control
 			// the user is not exist, continue to create the user
 			userDao.createUser(user).then( (doc) => {
 				return resolve(doc);
-			}).catch( (ex) => {
+			}).catch( ex => {
 				// db error, but don't directly send back to client
-				console.log('[serivce] ex=', ex);
-				return reject( standardRejectMessage );
+				log.error({error: ex.stack}, 'Error in doCreateUser()');
+				return reject('error');
 			});
 
-		}).catch( (ex) => {
-			console.log('[service] createUser.ex=', ex);
+		}).catch( ex => {
+			log.error({error: ex.stack}, 'Error in doCreateUser()');
 			return reject('User register failed');
 		});
 	});
 };
 
+//#todo: 需要修改args為object型態
 function deletePost(postId, currentId){
 	// check if currentId === post.user.authId
 	return new Promise( (resolve, reject) => {
 		postDao.getPost(postId).then( (doc) => {
-		if(doc.user.authId !== currentId){
-			return reject('ID不相符');
-		}else{
-			postDao.deletePost(postId).then( () => {
-				return resolve('ok');
-			}).catch( (ex) => {
-				return reject('failed');
-			});
-		}
-	}).catch();
+			if(doc.user.authId !== currentId){
+				return reject('ID不相符');
+			}else{
+				postDao.deletePost(postId).then( () => {
+					return resolve('ok');
+				}).catch( (ex) => {
+					return reject('failed');
+				});
+			}
+		}).catch( (ex) => {});
 	});
-	
 }
 
 /**
@@ -357,26 +361,23 @@ function deletePost(postId, currentId){
  * @param {object} user
  * @return {Promise}
  */
-function deleteUser(uid){
-	console.log('[service] deleteUser(), uid=', uid);
-	return new Promise(function(resolve, reject){
-		userDao.deleteUserById(uid).then( (doc) => {
-			console.log('[service] deleteUser success.');
-			return resolve('done');
-		}).catch ( (ex) => {
-			console.log('[service] deleteUser failed.');
-			return reject('failed to delete user.');
-		});
-	});
+async function deleteUser(uid){
+	log.info('deleteUser(%s) started', uid);
+	try{
+		await userDao.deleteUserById(uid);
+		log.info('deleteUser() finished.');
+	}catch(ex){
+		log.error({error: ex}, 'Error in deleteUser()');
+	}
 }
 
 //#todo-roy
 function getPost(postId){}
 
 async function doGetPosts(conditions){
-	console.log('[service] doGetPost(), conditions: ', conditions);
+	log.debug({conditions: conditions}, 'doGetPosts() started.');
 	let posts = await postDao.listPosts(conditions);
-	console.log('[service] doGetPosts(): posts.length=', posts.length);
+	log.trace('doGetPosts(): posts.length=%s', posts.length);
 	var d = new Date();
 	for(var i in posts){
 		//console.log('post[%s]=', i, posts[i]);
@@ -443,7 +444,6 @@ async function queryPosts({uid, pageNo = 1, pageSize} = {}){
 	result.postCount = postCount;
 	
 	// deal with pagination.
-	
 	result.page = {};
 	result.page.first = (pageNo === 1)? null: 1;
 	result.page.next = (pageNo < pageCount)? (pageNo + 1): null;
@@ -458,16 +458,15 @@ async function queryPosts({uid, pageNo = 1, pageSize} = {}){
  * @return {user|result} null if no such user
  */
 async function getUser(uid){
-	console.log('[service] getUser(%s)', uid);
-	
+	log.debug('getUser(%s) started.', uid);
 	if(uid === '0'){
 		let result = {};
-		result.name = '這是個忍者';	//#roy-todo: need to test
+		result.name = '這是個忍者';
 		return result;
 	}
 	
 	if(!validateUserFields({id: uid}, {id: true})){
-		console.error('不該有這個id:', uid);
+		log.error('不該有這個id:', uid);
 		let result = {};
 		result.name = '不該有這id';	//#roy-todo: need to test
 		return result;
@@ -475,11 +474,10 @@ async function getUser(uid){
 	
 	try{
 		let user = await userDao.findUserById(uid);
-		console.log('[service] getUser(%s)=', uid, user);
-		console.log('[service] getUser(): ok');
+		log.debug({user: user}, 'getUser(%s) finished.', uid);
 		return user;
 	}catch(ex){
-		console.log('[service] dao error, ex=', ex);
+		log.error({error: ex}, 'Error in getUser().');
 	}
 }
 
@@ -490,52 +488,54 @@ async function getUser(uid){
  */
 async function getUserInfo(uid){
 	try{
+		log.debug('getUserInfo(%s) start', uid);
 		let result = {};
 		result.user = await getUser(uid);
-		console.log('[service] getUserInfo: result.user=', result.user);
+		log.debug({'result.user': result.user}, 'getUserInfo(): Print result.user');
 		if(!result.user){
-			console.log('No such user: %s', uid);
+			log.debug('getUserInfo(%s): No such user.', uid);
 			return false;
 		}
 		result.postCount = await countPosts({uid: uid});
 		result.allPostCount = await countPosts({uid: uid, ignoreExpiry: true});
 		return result;
 	}catch(ex){
-		console.log(ex);
+		log.error({error: ex}, 'Error in getUserInfo()');
 	}
 }
 
 /**
  * 
  * @param {user} user object
- * @return {Promise}
+ * @return {object} user object
  */
-function login(user){
-	return new Promise(function(resolve, reject){
+async function login(user){
+	try{
 		// vaildate the login account first.
 		if(!validateUserFields(user, {account: true})){
-			console.log('輸入帳號有問題,有人不是透過browser發出post');
-			return reject('帳號或密碼格式錯誤');
+			log.warn('login(): 輸入帳號有問題,有人不是透過browser發出post');
+			return {failed: '帳號或密碼格式錯誤'};
 		}
 		
-		userDao.findUserById('app:' + user.account).then( (result) => {
-			if(result === null){
-				console.log('No such account exist.');
-				return reject('帳號或密碼錯誤');
-			}
-			if(result.password === user.password){
-				console.log('%s login success.', user.account);
-				return resolve({id: result.authId, name: result.name});
-			}else{
-				console.log('Password error');
-				return reject('帳號或密碼錯誤');	// security:不要單單使用[密碼錯誤]
-			}
-		}).catch( (ex) => {
-			console.log('[service] login.catch(ex)=', ex);
-			return reject('帳號或密碼錯誤');	// security:不要單單使用[帳號錯誤]
-		});
-	});
-};
+		let result = await userDao.findUserById('app:' + user.account);
+		if(result === null){
+			log.debug({'user.account': user.account}, 'login(): No such account exist.');
+			return {failed: '帳號(或密碼)錯誤'};
+		}
+			
+		//#roy-todo: Should use hash to store/compare password here
+		if(result.password === user.password){
+			log.debug('login(): %s login success.', user.account);
+			return {id: result.authId, name: result.name};
+		}else{
+			log.debug('login(): Password error.');
+			return {failed: '帳號或密碼錯誤'};	// security:不要單單使用[密碼錯誤]
+		}
+	}catch(ex){
+		log.error({error: ex.stack}, 'Error in login()');
+		return {failed: 'ERROR'};	// security:不要單單使用[帳號錯誤]
+	}
+}
 
 //#todo-roy
 function updatePost(post){}
@@ -545,22 +545,18 @@ function updatePost(post){}
  * @param {object} user
  * @return {Promise}
  */
-function updateUserName(user){
-	return new Promise(function(resolve, reject){
-		log('updateUser(), user', user);
+async function updateUserName(user){
+	try{
+		log.debug({user: user}, 'updateUserName() started');
 		if(!validateUserFields(user, {name: true})){
-			console.log('[service] 資料驗證失敗');
-			return reject('更新資料失敗，請確認資料');
+			log.debug('updateUserName(): 資料驗證失敗');
+			return {ok: false, msg: '更新資料失敗，請確認資料'};
 		}
-		var p1 = userDao.updateUser(user, '+name');
-		
-		var p2 = postDao.updatePost({'user.authId': user.authId}, {'user.name': user.name});
-		
-		Promise.all([p1, p2]).then( values => {
-			return resolve('ok');
-		}).catch( ex => {
-			console.log('[service] updateUserName() error=', ex);
-			return reject('更新資料失敗，請重新送出');
-		});
-	});
+		await userDao.updateUser(user);
+		await postDao.updatePost({'user.authId': user.authId}, {'user.name': user.name});
+		return {ok: true, msg: 'Update success'};
+	}catch(ex){
+		log.error({error: ex.stack, user: user}, 'Error in updateUserName()');
+		return {ok: false, msg: '更新資料失敗，請重新送出'};
+	};
 }

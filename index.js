@@ -3,6 +3,15 @@
 
 var serverConfig = require('./config/main.config');
 
+const LOG_LEVEL = require('./config/main.config').LOG_LEVEL;
+var log = require('bunyan').createLogger({
+	name: 'index',
+	streams: [{
+		level: LOG_LEVEL,
+		path: 'log/grumbler.log'
+	}]
+});
+
 var https = require('https');
 var fs = require('fs');
 var express = require('express');
@@ -69,10 +78,23 @@ app.use(function(req, res, next){
 	next();
 });
 
+// Use for temporary data between redirect
+app.use(function(req, res, next){
+	if(req.session.fields){
+		log.debug({tmp: req.session.fields}, 'Print middleware: req.session.fields');
+		
+		//res.locals.tmp = req.session.tmp;
+		//log.debug({locals: res.locals}, 'Print locals');
+		//delete req.session.tmp;
+	}
+	next();
+});
+
 // flash message middleware.
 app.use(function(req, res, next){
 	if(req.session.flash){
 		res.locals.flash = req.session.flash;
+		log.debug({locals: res.locals}, 'Print locals');
 		delete req.session.flash;
 	}
 	next();
@@ -95,7 +117,8 @@ var httpsOpt = {
 
 // setup HTTPS server
 https.createServer(httpsOpt, app).listen(app.get('port'), function(){
-	console.log('Express server started in %s on port %s. baseurl=%s', 
+	log.info('------------------------------');
+	log.info('Express server started in %s on port %s. baseurl=%s', 
 			app.get('env'), app.get('port'), serverConfig.baseurl);
-	console.log('伺服器已啟動。');
+	log.info('伺服器已啟動');
 });

@@ -3,6 +3,14 @@
 
 'use strict';
 
+const LOG_LEVEL = require('../config/main.config').LOG_LEVEL;
+var log = require('bunyan').createLogger({
+	name: 'user-dao',
+	streams: [{
+		level: LOG_LEVEL,
+		path: 'log/grumbler.log'
+	}]
+});
 
 var UserModel = require('../models/user');
 
@@ -15,15 +23,16 @@ exports.deleteUserById = deleteUserById;
 
 
 /**
- * Return total users
- * @return {Promise<number>} Total number of users
+ * Get user counts.
+ * @return {Promise<number>} Resolve user counts if query success. Reject -1 if 
+ *		some error happened.
  */
 function countUsers(){
 	return new Promise( (resolve, reject) => {
 		UserModel.count({}, function(err, count){
 			if(err){
-				console.log('[user-dao] err=', err);
-				return reject('db error');
+				log.error({error: err}, 'countUser() error');
+				return reject(-1);
 			}
 			return resolve(count);
 		});
@@ -32,27 +41,21 @@ function countUsers(){
 
 /**
  * Create user doc using predefined UserModel.
- * This method doesn't responsible for data vaildation.
+ * This method is not responsible for data vaildation.
  * @param {Object} user ojbect which will be save into database
- * @return {Promise} A promise object which can be used by further process.
+ * @return {Promise} Promise object. Resolve a user document object when process
+ *		success.
  */
 function createUser(user){
 	return new Promise(function(resolve, reject){
 		new UserModel(user).save(function(err, doc){
 			if(err){
-				errorHandler(err, 'createUser.save()');
-				return reject('[user-dao] Error in database process.');
+				log.error({error: err}, 'createUser() error');
+				return reject('error');
 			}
 			return resolve(doc);
 		});
 	});
-}
-
-function errorHandler(ex, msg){
-	console.error('[user-dao] error in database process:', msg);
-	if(ex){
-		console.log(ex.toString);
-	}
 }
 
 /* 
@@ -62,18 +65,17 @@ function errorHandler(ex, msg){
  * if user is not found.
  */
 function findUserById(uid){
-	return new Promise( (resolve, reject)=>{
+	return new Promise( (resolve, reject) => {
 		if(typeof uid !== 'string'){
-			errorHandler(null, 'uid should be a string.');
-			return reject('user object is not valid');
+			throw new TypeError('The uid argument should be a string');
 		}
 		
-		UserModel.findOne({authId: uid}, function(err, result){
+		UserModel.findOne({authId: uid}, function(err, user){
 			if(err){
-				errorHandler(err, 'findUserById()');
-				return reject('database error');		//#todo-roy: more specific msg?
+				log.error({error: err, uid: uid}, 'Error in findUserById()');
+				return reject('error');
 			}
-			return resolve(result);
+			return resolve(user);
 		});
 	});
 }
@@ -81,22 +83,24 @@ function findUserById(uid){
 /**
  * Delete the specific user
  * @param {Object} uid user id
- * @return {Promise<true|error>} Promise object. It will resolve if delete is 
- *		successful.
+ * @return {Promise<true|error>} Promise object. It will resolve true if 
+ *		delete is successful. Or resolve false if no any match.
  */
 function deleteUserById(uid){
 	return new Promise(function(resolve, reject){
-		// 不做validation，只做基本確認uid是String
-		if(typeof uid !== 'string') return reject('uid is not a string.');
+		if(typeof uid !== 'string'){
+			throw new TypeError('The uid argument should be a string');
+		}
+		
 		UserModel.findOneAndRemove({authId: uid}, function(err, doc){
 			if(err){
-				errorHandler(err, 'deleteUserById()');
-				return reject('dao error');
+				log.error({error: err, uid: uid}, 'Error in deleteUserById()');
+				return reject('error');
 			}
 			if(doc){
 				return resolve(true);
 			}else{
-				return reject('No such user');
+				return resolve(false);
 			}
 		});
 	});
@@ -106,27 +110,23 @@ function deleteUserById(uid){
 /**
  * Update the specific user
  * @param {object} user
- * @return {Promise<user|error>} Resolve the user obejct if update is successful.
+ * @return {Promise<user|error>} Resolve the user obejct if update success. Or
+ * resolve null if no any match.
  */
 function updateUser(user){
 	return new Promise( (resolve, reject) => {
 		// Remember: DAO does not validate user data
 		// You should do it in the service layer.
-		var opt = {
+		let opt = {
 			'new': true
 		};
 		
 		UserModel.findOneAndUpdate({authId: user.authId}, user, opt, function(err, doc){
 			if(err){
-				errorHandler(err, 'updateUser()');
-				return reject();
+				log.error({error: err}, 'Error in updateUser()');
+				return reject('error');
 			}
-			if(doc){
-				return resolve(doc);
-			}else{
-				console.log('[user-dao] Doc is null after updateUser()');
-				return reject('failed');
-			}
+			resolve(doc);
 		});
 	});
 }
