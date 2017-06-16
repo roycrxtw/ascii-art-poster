@@ -62,7 +62,7 @@ function createUser(user){
  * Find a user by user id(uid)
  * @param {string} uid User id
  * @return {Promise<user|error>} Resolve a user object, or a null doc object 
- * if user is not found.
+ * if user does not found.
  */
 function findUserById(uid){
 	return new Promise( (resolve, reject) => {

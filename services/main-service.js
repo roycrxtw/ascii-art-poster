@@ -6,6 +6,7 @@ var userDao = require('../dao/user-dao');
 var postDao = require('../dao/post-dao');
 var serviceData = require('./service-data');
 var mainConfig = require('../config/main.config');
+var passwordService = require('./password-service');
 
 var request = require('request');
 let debug = require('debug')('main-service');
@@ -35,8 +36,8 @@ exports.createAndLoginFbUser = createAndLoginFbUser;
 exports.createAndLoginGoogleUser = createAndLoginGoogleUser;
 exports.createAppUser = createAppUser;
 exports.deleteUser = deleteUser;
-
 exports.updateUserName = updateUserName;
+
 exports.login = login;
 
 exports.createPost = createPost;
@@ -79,106 +80,83 @@ async function countPosts({uid, ignoreExpiry = false} = {}){
  * To create and/or login Facebook user. The argument is a profile object 
  * parsed by passport-facebook module.
  * @param {Object} profile object. Parsed by passport-facebook module.
- * @return {Object} A promise object. Resolve a user object if creation success. 
+ * @return {Object} 
  */
-function createAndLoginFbUser(profile){
-	return new Promise( (resolve, reject) => {
+async function createAndLoginFbUser(profile){
+	try{
 		log.debug({profile: profile}, 'createAndLoginFbUser()');
-		let authId = 'fb:' + profile.id;
 		
-		getUser(authId).then( (doc) => {
-			if(doc){
-				log.debug('The facebook user is exist. Return user doc directly.');
-				return resolve(doc);
-			}else{
-				var preparedUser = {
-					authId: authId,
-					name: profile['_json'].name,
-					password: null,
-					email: profile['_json'].email || '0',
-					created: new Date(),
-					avator: 'nopath'	// Pre-reserved field.
-				};
-				
-				// create fb user to database
-				doCreateUser(preparedUser).then( (doc) => {
-					return resolve(doc);
-				}).catch( ex => {
-					log.error({error: ex.stack}, 'Error in createAndLoginFbUser(): create user');
-					return reject('error');
-				});
-			}
-		}).catch( ex => {
-			log.error({error: ex.stack}, 'Error in createAndLoginFbUser(): get user.');
-			return  reject('error');
-		});
-	});
+		let preparedUser = {
+			authId: 'fb:' + profile.id,
+			name: profile['_json'].name,
+			password: null,
+			email: profile['_json'].email || '0',
+			created: new Date(),
+			avator: 'nopath'	// Pre-reserved field.
+		};
+		
+		let result = await doCreateUser(preparedUser);
+		return result;
+	}catch(ex){
+		log.error({error: ex.stack}, 'Error in createAndLoginFbUser(): doCreateUser');
+		return false;
+	}
 }
 
 /**
  * To create and/or login Google OAuth user. User info(google id, name and 
  * email will be stored into database.
- * @param {Object} profile
- * @return {Promise}
+ * @param {object} profile object. Parsed by passport-google module.
+ * @return {object}
  */
-function createAndLoginGoogleUser(profile){
-	return new Promise( (resolve, reject) => {
-		log.debug({'profile.id': profile.id}, 'createAndLoginGoogleUser() start');
-		let authId = 'google:' + profile.id;
+async function createAndLoginGoogleUser(profile){
+	try{
+		log.debug({profile: profile}, 'createAndLoginGoogleUser()');
 		
-		getUser(authId).then( doc => {
-			if(doc){
-				log.debug('The facebook user is exist. Return user doc directly.');
-				return resolve(doc);
-			}else{
-				let preparedUser = {
-					authId: authId,
-					name: profile.displayName || profile['_json'].name,
-					password: null,
-					email: profile['_json'].email || '0',
-					created: new Date(),
-					avator: 'nopath'	// Pre-reserved field.
-				};
-				
-				// Create google user to database
-				doCreateUser(preparedUser).then( (doc) => {
-					return resolve(doc);
-				}).catch( ex => {
-					log.error({error: ex.stack}, 'Error in createAndLoginGoogleUser: create user');
-					return reject('error');
-				});
-			}
-		}).catch( (ex) => {
-			log.error({error: ex.stack}, 'Error in createAndLoginGoogleUser(): get user');
-			return  reject('error');
-		});
-	});
+		let preparedUser = {
+			authId: 'google:' + profile.id,
+			name: profile['_json'].name,
+			password: null,
+			email: profile['_json'].email || '0',
+			created: new Date(),
+			avator: 'nopath'	// Pre-reserved field.
+		};
+		
+		let result = await doCreateUser(preparedUser);
+		return result;
+	}catch(ex){
+		log.error({error: ex.stack}, 'Error in createAndLoginGoogleUser(): doCreateUser');
+		return false;
+	}
 }
 
 /**
- * Wrapper function
+ * 前導函式
  * @param {object} user
- * @return {Object} a Promise object
+ * @return {Object} true if creation success.
  */
-function createAppUser(user){
-	return new Promise(function(resolve, reject){
+async function createAppUser(user){
+	try{
+		let salt = await passwordService.generateSalt(10);
+		let hash = await passwordService.hash(user.password, salt);
+
 		let preparedUser = {
 			authId: 'app:' + user.account,
 			name: user.name,
-			password: user.password,
+			password: hash,
 			email: user.email || '0',
 			created: new Date(),
 			avator: 'nopath'	// Pre-reserved field.
 		};
-		if(!validateUserFields(preparedUser)){
-			return reject('您的欄位含有不允許的字元');
-		}
-		doCreateUser(preparedUser).then( doc => {
-			return resolve(doc);
-		}).catch(ex => {
-			return reject(ex);
-		});
-	});
+		
+		let result = await doCreateUser(preparedUser);
+		//#todo-roy: what value do I have to return?
+		// Does it have to return the created user?
+		return result;
+	}catch(ex){
+		log.error({error: ex.stack}, 'Error in createAppUser(): doCreateUser');
+		return false;
+	}
 }
 
 /**
@@ -305,37 +283,28 @@ function createPost(post){
 
 
 /**
- * #todo-roy: need to review.
+ * #todo-roy: need to review and unit-test.
+ * Check if user is exist and create it.
  * @param {Object} user object
- * @return {Promise}
+ * @return {boolean} true if creation success, false if it's failed.
  */
-function doCreateUser(user){
-	return new Promise(function(resolve, reject){
+async function doCreateUser(user){
+	try{
 		log.debug({user: user}, 'doCreateUser() started.');
-		
-		// #roy-todo: 在呼叫doCreateUser()之前其實就已經確認過user是否存在.
-		// 那麼在doCreateUser裡面是否要再確認一次?
-		// 確認pros: 安全
-		// cons: 重複.
-		
-		//那如果把確認user是否存在的工作交給doCreateUser做，是否ok?
-		//應從work flow去區分各個function之作用為何!
-		userDao.findUserById(user.authId).then(doc => {
-			if(doc){ return reject('本帳號已存在，請重新設定'); }	//#roy-todo: reject should not as flow control
+		let result = await userDao.findUserById(user.authId);
+		if(result){
+			// 本帳號已存在，請重新設定
+			//return {flag: false, message: '本帳號已存在，請重新設定'};
+			return {failed: '本帳號已存在，請重新設定'};
+		}else{
 			// the user is not exist, continue to create the user
-			userDao.createUser(user).then( (doc) => {
-				return resolve(doc);
-			}).catch( ex => {
-				// db error, but don't directly send back to client
-				log.error({error: ex.stack}, 'Error in doCreateUser()');
-				return reject('error');
-			});
-
-		}).catch( ex => {
-			log.error({error: ex.stack}, 'Error in doCreateUser()');
-			return reject('User register failed');
-		});
-	});
+			let newUser = await userDao.createUser(user);
+			return newUser;
+		}
+	}catch(ex){
+		log.error({error: ex.stack}, 'Error in doCreateUser()');
+		return reject('User register failed');
+	}
 };
 
 //#todo: 需要修改args為object型態
@@ -458,7 +427,7 @@ async function queryPosts({uid, pageNo = 1, pageSize} = {}){
 
 /**
  * 
- * @param {type} uid
+ * @param {string} uid
  * @return {user|result} null if no such user
  */
 async function getUser(uid){
@@ -515,22 +484,24 @@ async function getUserInfo(uid){
  */
 async function login(user){
 	try{
+		// #todo-roy: validate function doesn't test
 		// vaildate the login account first.
-		if(!validateUserFields(user, {account: true})){
-			log.warn('login(): 輸入帳號有問題,有人不是透過browser發出post');
-			return {failed: '帳號或密碼格式錯誤'};
-		}
+//		if(!validateUserFields(user, {account: true})){
+//			log.warn('login(): 輸入帳號有問題,有人不是透過browser發出post');
+//			return {failed: '帳號或密碼格式錯誤'};
+//		}
+		
+		log.debug('login(): id=%s, pwd=%s', user.account, user.password);
 		
 		let result = await userDao.findUserById('app:' + user.account);
 		if(result === null){
 			log.debug({'user.account': user.account}, 'login(): No such account exist.');
 			return {failed: '帳號(或密碼)錯誤'};
 		}
-			
-		//#roy-todo: Should use hash to store/compare password here
-		if(result.password === user.password){
+		
+		if(await passwordService.compare(user.password, result.password) === true){
 			log.debug('login(): %s login success.', user.account);
-			return {id: result.authId, name: result.name};
+			return {ok: 'login success', id: result.authId, name: result.name};
 		}else{
 			log.debug('login(): Password error.');
 			return {failed: '帳號或密碼錯誤'};	// security:不要單單使用[密碼錯誤]
