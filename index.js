@@ -12,10 +12,10 @@ var log = require('bunyan').createLogger({
 	}]
 });
 
-var https = require('https');
+//var https = require('https');
 var fs = require('fs');
 var express = require('express');
-var subdomain = require('express-subdomain');
+//var subdomain = require('express-subdomain');
 var handlebars = require('express-handlebars').create({
 	defaultLayout: 'main'
 });
@@ -104,21 +104,30 @@ app.set('env', 'development');
 app.set('port', 3002);
 
 // setup subdomain in production time
-if(app.get('env') === 'production'){
-	app.use(subdomain('grumbler', require('./controllers/dispatcher')));
-}else{
-	app.use(require('./controllers/dispatcher'));
-}
+//if(app.get('env') === 'production'){
+//	app.use(subdomain('grumbler', require('./controllers/dispatcher')));
+//}else{
+//	app.use(require('./controllers/dispatcher'));
+//}
 
-var httpsOpt = {
-	key: fs.readFileSync(serverConfig.mainkey),
-	cert: fs.readFileSync(serverConfig.maincert)
-};
+app.use(require('./controllers/dispatcher'));
 
-// setup HTTPS server
-https.createServer(httpsOpt, app).listen(app.get('port'), function(){
+app.listen(app.get('port'), function(){
 	log.info('------------------------------');
 	log.info('Express server started in %s on port %s. baseurl=%s', 
 			app.get('env'), app.get('port'), serverConfig.baseurl);
 	log.info('伺服器已啟動');
 });
+
+//var httpsOpt = {
+//	key: fs.readFileSync(serverConfig.mainkey),
+//	cert: fs.readFileSync(serverConfig.maincert)
+//};
+
+// setup HTTPS server
+//https.createServer(httpsOpt, app).listen(app.get('port'), function(){
+//	log.info('------------------------------');
+//	log.info('Express server started in %s on port %s. baseurl=%s', 
+//			app.get('env'), app.get('port'), serverConfig.baseurl);
+//	log.info('伺服器已啟動');
+//});
