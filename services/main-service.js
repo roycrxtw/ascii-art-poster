@@ -77,30 +77,11 @@ async function countPosts({uid, ignoreExpiry = false} = {}){
 }
 
 /**
- * To create and/or login Facebook user. The argument is a profile object 
- * parsed by passport-facebook module.
- * @param {Object} profile object. Parsed by passport-facebook module.
- * @return {Object} 
+ * Wrapper function
+ * @param {*} profile 
  */
 async function createAndLoginFbUser(profile){
-	try{
-		log.debug({profile: profile}, 'createAndLoginFbUser()');
-		
-		let preparedUser = {
-			authId: 'fb:' + profile.id,
-			name: profile['_json'].name,
-			password: null,
-			email: profile['_json'].email || '0',
-			created: new Date(),
-			avator: 'nopath'	// Pre-reserved field.
-		};
-		
-		let result = await doCreateUser(preparedUser);
-		return result;
-	}catch(ex){
-		log.error({error: ex.stack}, 'Error in createAndLoginFbUser(): doCreateUser');
-		return false;
-	}
+	return await createAndLoginOAuthUser(profile, 'fb');
 }
 
 /**
@@ -110,25 +91,51 @@ async function createAndLoginFbUser(profile){
  * @return {object}
  */
 async function createAndLoginGoogleUser(profile){
+	return await createAndLoginOAuthUser(profile, 'google');
+}
+
+
+/**
+ * To create and/or login Facebook user. The argument is a profile object 
+ * parsed by passport-facebook module.
+ * @param {Object} profile object. Parsed by passport-facebook module.
+ * @param {string} prefix
+ * @return {Object} 
+ */
+async function createAndLoginOAuthUser(profile, prefix){
 	try{
-		log.debug({profile: profile}, 'createAndLoginGoogleUser()');
+		debug('in createAndLoginOAuthUser');
+		log.debug({profile: profile}, 'createAndLoginOAuthUser()');
 		
 		let preparedUser = {
-			authId: 'google:' + profile.id,
+			authId: prefix + ':' + profile.id,
 			name: profile['_json'].name,
 			password: null,
 			email: profile['_json'].email || '0',
 			created: new Date(),
 			avator: 'nopath'	// Pre-reserved field.
 		};
+		debug('preparedUser=', preparedUser);
+
+		let result = {};
+		let query = await userDao.findUserById(preparedUser.authId);
+		if(query){
+			debug('User exists. Return user info.');
+			result.authId = query.authId;
+			result.name = query.name;
+		}else{
+			debug('User does not exists. Trying to create new user.');
+			result = await doCreateUser(preparedUser);
+		}
 		
-		let result = await doCreateUser(preparedUser);
+		debug('result=', result);
 		return result;
 	}catch(ex){
-		log.error({error: ex.stack}, 'Error in createAndLoginGoogleUser(): doCreateUser');
+		log.error({error: ex.stack}, 'Error in createAndLoginFbUser(): doCreateUser');
 		return false;
 	}
 }
+
 
 /**
  * 前導函式
@@ -491,7 +498,7 @@ async function login(user){
 //			return {failed: '帳號或密碼格式錯誤'};
 //		}
 		
-		log.debug('login(): id=%s, pwd=%s', user.account, user.password);
+		debug('in login(user): user=%s', user);
 		
 		let result = await userDao.findUserById('app:' + user.account);
 		if(result === null){
@@ -501,7 +508,7 @@ async function login(user){
 		
 		if(await passwordService.compare(user.password, result.password) === true){
 			log.debug('login(): %s login success.', user.account);
-			return {ok: 'login success', id: result.authId, name: result.name};
+			return {ok: 'login success', authId: result.authId, name: result.name};
 		}else{
 			log.debug('login(): Password error.');
 			return {failed: '帳號或密碼錯誤'};	// security:不要單單使用[密碼錯誤]

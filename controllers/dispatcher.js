@@ -19,12 +19,14 @@ var expiryData = require('../services/expiryData');
 var config = require('./config.js');
 var mainConfig = require('../config/main.config');
 
+var debug = require('debug')('r');
+
 router.use(function(req, res, next){
 	next();
 });
 
 router.get(['/', '/home'], function(req, res, next){
-	log.info({uid: req.session.uid, uname: req.session.uname}, 'Request get>/home');
+	debug('Request get>/home', {uid: req.session.uid, uname: req.session.uname});
 	res.locals.css = ['home'];
 	res.render('home', {uid: req.session.uid, uname: req.session.uname});
 });
@@ -44,21 +46,22 @@ router.get('/login/facebook',
 
 router.get('/login/facebook/return', 
 		passport.authenticate('facebook', { failureRedirect: '/login' }), 
-		function(req, res, next) {
+		async function(req, res, next) {
 	if(req.session.uid){
 		res.redirect(303, '/home');
 	}
 	
-	service.createAndLoginFbUser(req.user).then( (doc) => {
-		req.session.uid = doc.authId;
-		req.session.uname = doc.name;
+	try{
+		let user = await service.createAndLoginFbUser(req.user);
+		req.session.uid = user.authId;
+		req.session.uname = user.name;
 		req.session.flash = '成功登入';
 		res.redirect(303, '/');
-	}).catch(ex => {
+	}catch(ex){
 		log.error({error: ex.stack}, 'Error in get>/login/facebook/return');
 		req.session.flash = config.msg.error;
 		res.redirect(303, '/');
-	});
+	}
 });
 
 router.get('/login/google',
@@ -72,20 +75,22 @@ router.get('/login/google',
 
 router.get('/login/google/return', 
 		passport.authenticate('google', { failureRedirect: '/login' }), 
-		function(req, res, next) {
+		async function(req, res, next) {
 	if(req.session.uid){
 		res.redirect(303, '/home');
 	}
-	service.createAndLoginGoogleUser(req.user).then( (doc) => {
-		req.session.uid = doc.authId;
-		req.session.uname = doc.name;
+
+	try{
+		let user = await service.createAndLoginGoogleUser(req.user);
+		req.session.uid = user.authId;
+		req.session.uname = user.name;
 		req.session.flash = '成功登入';
 		res.redirect(303, '/');
-	}).catch(ex => {
-		log.error({error: ex.stack}, 'get>/login/google/return');
+	}catch(ex){
+		log.error({error: ex.stack}, 'Error in get>%s', req.path);
 		req.session.flash = config.msg.error;
 		res.redirect(303, '/');
-	});
+	}
 });
 
 router.get('/user', function(req, res, next){
@@ -234,7 +239,7 @@ router.get('/list/:pageNo', async function(req, res, next){
 });
 
 router.get("/login", function(req, res, next){
-	log.debug('Request get>/login started.');
+	debug('Request get>/login started.');
 	if(req.session.uid){
 		return res.redirect(303, '/list');
 	}
@@ -248,7 +253,7 @@ router.get("/login", function(req, res, next){
 });
 
 router.post('/login', async function(req, res, next){
-	log.debug('Request post>/login started.');
+	debug('Request post>/login started.');
 	let user = {
 		account: req.body.account,
 		password: req.body.password

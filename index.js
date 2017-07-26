@@ -62,7 +62,7 @@ app.set('view engine', 'handlebars');
 app.set('views', __dirname + '/views')
 
 // setup time log middleware for response time recording.
-app.use(require('./services/time-log'));
+//app.use(require('./services/time-log'));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -119,6 +119,7 @@ app.listen(app.get('port'), function(){
 	log.info('伺服器已啟動');
 });
 
+// No longer need https server since we are currently using nginx as reverse proxy.
 //var httpsOpt = {
 //	key: fs.readFileSync(serverConfig.mainkey),
 //	cert: fs.readFileSync(serverConfig.maincert)

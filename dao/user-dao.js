@@ -58,7 +58,7 @@ function createUser(user){
 	});
 }
 
-/* 
+/**
  * Find a user by user id(uid)
  * @param {string} uid User id
  * @return {Promise<user|error>} Resolve a user object, or a null doc object 
