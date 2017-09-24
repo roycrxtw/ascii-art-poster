@@ -1,6 +1,6 @@
 {
   "name": "grumbler",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "description": "Good place for grumbling",
   "main": "index.js",
   "scripts": {
@@ -9,26 +9,30 @@
   "author": "Roy Lu (royvbtw)",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^1.0.2",
-    "body-parser": "^1.16.1",
-    "bunyan": "^1.8.10",
-    "debug": "^2.6.4",
-    "express": "^4.14.1",
+    "bcrypt": "^1.0.3",
+    "body-parser": "^1.18.2",
+    "bunyan": "^1.8.12",
+    "express": "^4.15.4",
     "express-handlebars": "^3.0.0",
-    "express-session": "^1.15.1",
+    "express-session": "^1.15.5",
     "express-subdomain": "^1.0.5",
     "google-auth-library": "^0.10.0",
-    "mongoose": "^4.8.5",
+    "mongoose": "^4.11.12",
     "passport": "^0.3.2",
     "passport-facebook": "^2.1.1",
     "passport-google-oauth20": "^1.0.0",
-    "request": "^2.81.0"
+    "request": "^2.82.0"
   },
   "directories": {
     "doc": "doc"
   },
   "devDependencies": {
-    "chai": "^4.0.0",
-    "mocha": "*"
+    "chai": "^4.1.2",
+    "debug": "^2.6.9",
+    "mocha": "^3.5.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/royvbtw/grumbler.git"
   }
 }
