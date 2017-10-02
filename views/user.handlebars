@@ -3,26 +3,25 @@
 
 <div class='avator'>&#x1f383;</div>
 
-
 {{#if editable}}
-<form class='form-plain' method='post' action=''>
-	<label>顯示名稱:<input type='text' name='name' value='{{user.name}}' 
-			pattern='.{1, 20}' required title='最少須有一個字母'/></label>
-	<label>加入日期:<br/>{{user.created}}</label>
-	<label>文章總數:<input type='text' value='{{user.postCount}}/{{user.allPostCount}}' readonly /></label>
-	{{#if user.xauth}}<label>您是使用{{user.xauth}}服務註冊的使用者</label>{{/if}}
-	<label>帳號管理:<span class='btn-deleteUser'>刪除本帳號</span></label>
-	<input type='submit' value='更新' />
-</form>
+  <form class='form-plain' method='post' action=''>
+    <label>顯示名稱:<input type='text' name='name' value='{{user.name}}' 
+        pattern='.{1, 20}' required title='最少須有一個字母'/></label>
+    <label>加入日期:<br/>{{user.created}}</label>
+    <label>文章總數:<input type='text' value='{{user.postCount}}/{{user.allPostCount}}' readonly /></label>
+    {{#if user.xauth}}<label>您是使用{{user.xauth}}服務註冊的使用者</label>{{/if}}
+    <label>帳號管理:<span class='btn-deleteUser'>刪除本帳號</span></label>
+    <input type='submit' value='更新' />
+  </form>
 {{else}}
-加入日期: {{user.created}}
-文章總數: {{user.postCount}}
+  加入日期: {{user.created}}
+  文章總數: {{user.postCount}}
 {{/if}}
 
 
 <script>
 $('.btn-deleteUser').on('click', () => {
-	if(window.confirm('您確定要刪除帳號?')){
+  if(window.confirm('您確定要刪除帳號?')){
 		$.ajax({
 			url: '/user',
 			method: 'POST',

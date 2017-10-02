@@ -8,6 +8,7 @@ form{
 	padding: 20px;
 	background-color: snow;
 	box-shadow: 0 0 5px 0 indigo;
+	font-size: 14px;
 	transition: all 500ms;
 }
 @media only screen and (min-width: 768px){
@@ -15,7 +16,7 @@ form{
 		width: 400px;
 	}
 }
-@media only screen and (min-width: 1024px){
+@media (min-width: 1280px){
 	form{
 		width: 30vw;
 	}
@@ -51,7 +52,6 @@ label{
 }
 
 .cbLabel:hover{
-	
 	cursor: pointer;
 	background-color: rgb(81, 184, 225);
 }
@@ -62,8 +62,9 @@ label{
 	margin: 5px 0px;
 	transition: all 500ms;
 	color: grey;
+	font-size: 14px;
 }
-@media only screen and (min-width: 1024px){
+@media (min-width: 1280px){
 	.field{
 		font-size: 3vmin;
 		line-height: 5vmin;

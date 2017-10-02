@@ -1,5 +1,9 @@
 
-// The data access object of Post collection 
+/**
+ * The data access object of the Post collection 
+ * @author Roy Lu(royvbtw)
+ * Sep, 2017
+ */
 
 'use strict';
 
@@ -8,7 +12,7 @@ var log = require('bunyan').createLogger({
 	name: 'post-dao',
 	streams: [{
 		level: LOG_LEVEL,
-		path: 'log/grumbler.log'
+		path: 'log/grumblers.log'
 	}]
 });
 
@@ -26,15 +30,15 @@ exports.countPosts = countPosts;
 
 /**
  * Get post counts.
- * @param {object} criteria Conditions for query
+ * @param {object} criteria Conditions for this query
  * @return {Promise<number>} Resolve: a post count for the criteria argument.
  */
 function countPosts(criteria){
-	log.info({criteria: criteria}, 'countPost()');
+	log.info({criteria}, 'countPost() started');
 	return new Promise( (resolve, reject) => {
 		postModel.count(criteria, function(err, count){
 			if(err){
-				log.error({error: err}, 'Error in countPosts()');
+				log.error({err}, 'Error in countPosts()');
 				return reject('error');
 			}
 			return resolve(count);
@@ -42,17 +46,18 @@ function countPosts(criteria){
 	});
 }
 
+
 /**
- * Save a post to database
+ * Save a post to the database
  * @param {object} post
- * @return {Promise<true|error>} Resolve true if creation success. Or reject
+ * @return {Promise<true|error>} Resolve true if creation success, or reject an
  * error if something wrong.
  */
 function createPost(post){
-	return new Promise(function(resolve, reject){
+	return new Promise( (resolve, reject) => {
 		new postModel(post).save(function(err, doc){
 			if(err){
-				log.error({error: err}, 'Error in createPost()');
+				log.error({err}, 'Error in createPost()');
 				return reject('error');
 			}
 			log.info('createPost() success.');
@@ -75,19 +80,19 @@ function readPost(postId){
 		
 		postModel.findOne({_id: postId}, function(err, doc){
 			if(err){
-				log.error({error: err, postId: postId}, 'Error in readPost()');
+				log.error({postId, err}, 'Error in readPost()');
 				return reject('error');
 			}
-			console.log('[post-dao] Return the result=', doc);
 			return resolve(doc);
 		});
 	});
 }
 
+
 /**
- * Delete a post according to the post id
+ * Delete a post with the given post id
  * @param {string} postId
- * @return {Promise<true|error>}
+ * @return {Promise<boolean|error>}
  */
 function deletePost(postId){
 	return new Promise( (resolve, reject) => {
@@ -97,26 +102,27 @@ function deletePost(postId){
 		
 		postModel.findOneAndRemove({_id: postId}, function(err, doc){
 			if(err){
-				log.error({error: err, postId: postId}, 'Error in deletePost()');
+				log.error({postId, err}, 'Error in deletePost()');
 				return reject('error');
 			}
 			if(doc){
 				log.info('deletePost() success.');
 				return resolve(true);
 			}else{
-				log.info({doc: doc}, 'deletePost() result is null');
-				return reject('No such post');		//#roy-todo: need some test.
+				log.info({doc}, 'deletePost() result is null');
+				return resolve(false);
 			}
 		});
 	});
 }
+
 
 /**
  * Get posts from database
  * @return {Promise<Array<post>>}
  */
 function listPosts(conditions){
-	log.info({conditions: conditions}, 'listPosts() start');
+	log.info({conditions}, 'listPosts() started.');
 	return new Promise( (resolve, reject) => {
 		let query = postModel.find(conditions.query, conditions.projection)
 				.sort({'created': -1})
@@ -125,14 +131,14 @@ function listPosts(conditions){
 				.lean(true);
 		query.exec(function(err, docs){
 			if(err){
-				log.error({error: err}, 'Error in listPosts().');
+				log.error({err}, 'Error in listPosts().');
 				return reject('error');
 			}
-			log.debug({docs: docs}, 'listPosts() Print docs.');
 			return resolve(docs);
 		});
 	});
 }
+
 
 /**
  * Update a post.
@@ -140,23 +146,22 @@ function listPosts(conditions){
  * @param {Object} post The post which is ready for update.
  * @return {Promise<true|error>} Promise resolve true if update success.
  */
-function updatePost(criteria, post){
-	log.info({criteria: criteria, post: post}, 'updatePost() start.');
+function updatePost({criteria, post}){
+	log.info({criteria, post}, 'updatePost() started.');
 	return new Promise( (resolve, reject) => {
 		// Remember: DAO does not validate user data
 		// You should do it in the service layer.
-		//postModel.findOneAndUpdate(criteria, post, function(err, doc){});
 		postModel.update(criteria, post, {multi: true}, function(err, doc){
 			if(err){
-				log.error({error: err}, 'updatePost()');
+				log.error({err}, 'updatePost()');
 				return reject('error');
 			}
 			if(doc){
 				log.info('updatePost() success.');
 				return resolve(true);
 			}else{
-				log.info('updatePost() has some problem.');		//#roy-todo: need test
-				return reject('failed');
+				log.info('updatePost() has some problem.');
+				return resolve(false);
 			}
 		});
 	});

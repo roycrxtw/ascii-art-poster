@@ -1,39 +1,36 @@
 
 <form class='form-grumbling' method="post" action="/post">
-<div class='form-title'>發個抱怨文</div>
-<div class='block-category'>
-<div class='item-category'>
-	文章分類
-	<select name='category'>
-	{{#each post.category}}
-		<option value="{{this}}">{{this}}</option>
-	{{/each}}
-	</select>
-</div>
-<div class='item-input'>
-<input type="text" name='title' value='{{post.title}}' 
-	   placeholder="抱怨主題" required/></div>
-</div>
-<textarea id='fieldContent' name='content' placeholder="抱怨內容" 
-		required>{{post.content}}</textarea>
-<span data-info='設定文章消失時間'><label class='cbLabel'>
-	限時消失
-	<select name='expiry'>
-	{{#each post.expiry}}
-		<option value="{{@index}}">~{{this.name}}</option>
-	{{/each}}
-	</select>
-</label></span>
-<span data-info='不顯示名字'><label class='cbLabel'>
-	<input type="checkbox" name="ghost" value="true" {{#if post.ghost}}checked{{/if}}>匿名發表
-</label></span>
-<div class="g-recaptcha" data-callback="enableBtn" 
-		data-sitekey='{{recaptchaSiteKey}}'></div>
-<button class="btnSubmit" type="submit" disabled/>請先點選上方驗證</button>
+  <div class='form-title'>發個抱怨文</div>
+  <div class='block-category'>
+    <div class='item-category'>
+      文章分類
+      <select name='category'>
+        {{#each post.category}}
+          <option value="{{this}}">{{this}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <input type="text" name='title' value='{{post.title}}' placeholder="抱怨主題" required/>
+  </div>
+  <textarea id='fieldContent' name='content' placeholder='抱怨內容' required>{{post.content}}</textarea>
+  <span data-info='設定文章消失時間'><label class='cbLabel'>
+    限時消失
+    <select name='expiry'>
+    {{#each post.expiry}}
+      <option value="{{@index}}">~{{this.name}}</option>
+    {{/each}}
+    </select>
+  </label></span>
+  <span data-info='不顯示名字'><label class='cbLabel'>
+    <input type="checkbox" name="ghost" value="true" {{#if post.ghost}}checked{{/if}}>匿名發表
+  </label></span>
+  <div class="g-recaptcha" data-callback="enableBtn" 
+      data-sitekey='{{recaptchaSiteKey}}'></div>
+  <button class="btnSubmit" disabled/>請先點選上方驗證</button>
 </form>
 
 <script>
-
 function enableBtn(){
 	//$('.btnSubmit').css('display', 'block');
 	//$('.btnSubmit').removeAttr('disabled');

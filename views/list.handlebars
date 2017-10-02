@@ -1,6 +1,6 @@
 
 <div class='block-page'>
-<div class='title'>{{#if owner}}您的文章列表{{else}}負能量合輯{{/if}}</div>
+<div class='title'>{{#if isOwner}}您的文章列表{{else}}負能量合輯{{/if}}</div>
 <div class='page-tile page-number'>{{currentPage}}/{{pageCount}}頁</div>
 <div class='page-tile page-info'>{{postCount}}篇文章</div>
 {{#if page.first}}<a class='page-tile btn' href='{{path}}/1'>第一頁</a>{{/if}}
@@ -10,27 +10,25 @@
 </div>
 
 <div class='masonry'>
-{{#each posts}}<div class='post' data-pid='{{this.postId}}'>
-<div class='post-header'>
-<div class='category'>{{this.category}}</div>
-{{#if this.isExpired}}
-	<div class='post-title expired'>{{this.title}}
-	<span class='expired-post-note'>本文章已過期</span></div>
-{{else}}
-	<div class='post-title'>{{this.title}}</div>
-{{/if}}
-<div class='post-author'>{{this.user.name}}</div>
-</div><!-- end of post-header -->
+{{#each posts}}
+<div class='post' data-pid='{{this.postId}}'>
+	<div class='post-header'>
+		<div class='category'>{{this.category}}</div>
+		{{#if this.isExpired}}
+			<div class='post-title expired'>{{this.title}}
+			<span class='expired-post-note'>本文章已過期</span></div>
+		{{else}}
+			<div class='post-title'>{{this.title}}</div>
+		{{/if}}
+		<div class='post-author'><a class='link-author' href='/user/{{this.user.authId}}'>{{this.user.name}}</a> @{{this.createdAt}}</div>
+	</div><!-- end of post-header -->
 
-<div class='content'>
-	<pre><code>{{this.content}}</code></pre>
-	<div class='info'>
-		by <a href='/user/{{this.user.authId}}'>{{this.user.name}}</a>
-		<a href='/post/{{this.postId}}'>#</a>
-	{{this.created}}<br/>
-	{{#if this.expiry}}文章期限: {{this.expiry}}{{/if}}
+	<div class='content'><pre><code>{{this.content}}</code></pre>
+		<div class='info'>
+			<a href='/post/{{this.postId}}'>#</a>
+			{{#if this.expiry}}文章期限: {{this.expiry}}{{/if}}
+		</div>
 	</div>
-</div>
 </div><!--end of .post-->
 {{/each}}
 

@@ -1,11 +1,22 @@
 
-// A password handler interface.
-// This module use bcrypt to hash/compare passwords.
+/**
+ * Project Grumbler
+ * A password handling service.
+ * This module uses bcrypt to hash/compare passwords.
+ * @author Roy Lu
+ * Sep, 2017
+ */
 
 'use strict';
 
 var bcrypt = require('bcrypt');
 
+/**
+ * 
+ * @param {string} plainPassword 
+ * @param {string} hashedPassword
+ * @return {boolean} true if passwords are same.
+ */
 async function compare(plainPassword, hashedPassword){
 	return await bcrypt.compare(plainPassword, hashedPassword);
 }

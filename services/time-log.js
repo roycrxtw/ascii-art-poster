@@ -1,7 +1,8 @@
 
-
-// a utility to record time cost between request and response.
-// @Roy Lu
+/**
+ * a utility to record time cost between request and response.
+ * @author Roy Lu
+ */
 
 'use strict';
 

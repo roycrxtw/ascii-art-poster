@@ -1,5 +1,8 @@
-
-// Data access object for 
+/**
+ * Data access object for the user collection.
+ * @author Roy Lu(royvbtw)
+ * Sep, 2017
+ */
 
 'use strict';
 
@@ -8,7 +11,7 @@ var log = require('bunyan').createLogger({
 	name: 'user-dao',
 	streams: [{
 		level: LOG_LEVEL,
-		path: 'log/grumbler.log'
+		path: 'log/grumblers.log'
 	}]
 });
 
@@ -24,33 +27,33 @@ exports.deleteUserById = deleteUserById;
 
 /**
  * Get user counts.
- * @return {Promise<number>} Resolve user counts if query success. Reject -1 if 
- *		some error happened.
+ * @return {Promise<number>} Resolve user counts if query success.
  */
 function countUsers(){
 	return new Promise( (resolve, reject) => {
 		UserModel.count({}, function(err, count){
 			if(err){
-				log.error({error: err}, 'countUser() error');
-				return reject(-1);
+				log.error({err}, 'countUser() error');
+				return reject('error');
 			}
 			return resolve(count);
 		});
 	});
 }
 
+
 /**
  * Create user doc using predefined UserModel.
  * This method is not responsible for data vaildation.
- * @param {Object} user ojbect which will be save into database
- * @return {Promise} Promise object. Resolve a user document object when process
- *		success.
+ * @param {object} user A user ojbect which will be save into database
+ * @return {Promise<object>} Resolve a user document object when process
+ * success.
  */
 function createUser(user){
-	return new Promise(function(resolve, reject){
+	return new Promise( (resolve, reject) => {
 		new UserModel(user).save(function(err, doc){
 			if(err){
-				log.error({error: err}, 'createUser() error');
+				log.error({err}, 'createUser() error');
 				return reject('error');
 			}
 			return resolve(doc);
@@ -58,11 +61,12 @@ function createUser(user){
 	});
 }
 
+
 /**
- * Find a user by user id(uid)
+ * Find a user by user id
  * @param {string} uid User id
  * @return {Promise<user|error>} Resolve a user object, or a null doc object 
- * if user does not found.
+ * if found nothing.
  */
 function findUserById(uid){
 	return new Promise( (resolve, reject) => {
@@ -72,7 +76,7 @@ function findUserById(uid){
 		
 		UserModel.findOne({authId: uid}, function(err, user){
 			if(err){
-				log.error({error: err, uid: uid}, 'Error in findUserById()');
+				log.error({uid, err}, 'Error in findUserById()');
 				return reject('error');
 			}
 			return resolve(user);
@@ -80,10 +84,11 @@ function findUserById(uid){
 	});
 }
 
+
 /**
  * Delete the specific user
- * @param {Object} uid user id
- * @return {Promise<true|error>} Promise object. It will resolve true if 
+ * @param {string} uid user id
+ * @return {Promise<boolean|error>} Resolve true if 
  *		delete is successful. Or resolve false if no any match.
  */
 function deleteUserById(uid){
@@ -94,7 +99,7 @@ function deleteUserById(uid){
 		
 		UserModel.findOneAndRemove({authId: uid}, function(err, doc){
 			if(err){
-				log.error({error: err, uid: uid}, 'Error in deleteUserById()');
+				log.error({uid, err}, 'Error in deleteUserById()');
 				return reject('error');
 			}
 			if(doc){
@@ -123,7 +128,7 @@ function updateUser(user){
 		
 		UserModel.findOneAndUpdate({authId: user.authId}, user, opt, function(err, doc){
 			if(err){
-				log.error({error: err}, 'Error in updateUser()');
+				log.error({err}, 'Error in updateUser()');
 				return reject('error');
 			}
 			resolve(doc);

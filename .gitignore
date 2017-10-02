@@ -1,6 +1,6 @@
-tls/
 config/
 doc/
-node_modules/
-.netbeans.xml
 log/
+node_modules/
+temp/
+

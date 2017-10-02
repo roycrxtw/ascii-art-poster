@@ -1,9 +1,17 @@
 
+/**
+ * Project Grumbler
+ * Entry point
+ * @author Roy Lu
+ * Sep, 2017
+ */
+
 'use strict';
 
-var serverConfig = require('./config/main.config');
+const config = require('./config/main.config');
+const LOG_LEVEL = config.LOG_LEVEL;
+const PORT = config.port;
 
-const LOG_LEVEL = require('./config/main.config').LOG_LEVEL;
 var log = require('bunyan').createLogger({
 	name: 'index',
 	streams: [{
@@ -12,35 +20,32 @@ var log = require('bunyan').createLogger({
 	}]
 });
 
-//var https = require('https');
-var fs = require('fs');
+var debug = require('debug')('main');
+
 var express = require('express');
-//var subdomain = require('express-subdomain');
 var handlebars = require('express-handlebars').create({
 	defaultLayout: 'main'
 });
-var	bodyParser = require('body-parser');
-var session = require('express-session');
 
-// passport module for authentication(Facebook and google).
+// Set up passport middleware module for authentication(Facebook and google).
 var passport = require('passport');
 var Strategy = require('passport-facebook').Strategy;
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 // facebook passport strategy
 passport.use(new Strategy({
-	clientID: serverConfig.facebookClientID,
-	clientSecret: serverConfig.facebookClientSecret,
-	callbackURL: serverConfig.facebookCallbackURL,
+	clientID: config.facebookClientID,
+	clientSecret: config.facebookClientSecret,
+	callbackURL: config.facebookCallbackURL,
 	profileFields: ['id', 'name', 'emails', "age_range", "displayName", "about", "gender"]
 }, function(accessToken, refreshToken, profile, cb) {
 	return cb(null, profile);
 }));
 
 passport.use(new GoogleStrategy({
-	clientID: serverConfig.googleClientID,
-	clientSecret: serverConfig.googleClientSecret,
-	callbackURL: serverConfig.googleCallbackURL
+	clientID: config.googleClientID,
+	clientSecret: config.googleClientSecret,
+	callbackURL: config.googleCallbackURL
 }, function(accessToken, refreshToken, profile, cb) {
 	return cb(null, profile);
 }));
@@ -48,24 +53,26 @@ passport.serializeUser(function(user, cb) { cb(null, user);});
 passport.deserializeUser(function(obj, cb) { cb(null, obj);});
 
 var app = express();
-
+var session = require('express-session');
 app.use(session({
-	cookie: { secure: false },
-	resave: false,
-	saveUninitialized: true,
-	secret: 'rockstone'
+  cookie: { secure: false },
+  resave: false,
+  saveUninitialized: true,
+  secret: 'rockstone'
 }));
 app.use(express.static(__dirname + '/public'));
 
+var	bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
-app.set('views', __dirname + '/views')
+app.set('views', __dirname + '/views');
 
 // setup time log middleware for response time recording.
 //app.use(require('./services/time-log'));
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -78,57 +85,30 @@ app.use(function(req, res, next){
 	next();
 });
 
-// Use for temporary data between redirect
-app.use(function(req, res, next){
-	if(req.session.fields){
-		log.debug({tmp: req.session.fields}, 'Print middleware: req.session.fields');
-		
-		//res.locals.tmp = req.session.tmp;
-		//log.debug({locals: res.locals}, 'Print locals');
-		//delete req.session.tmp;
-	}
-	next();
-});
 
-// flash message middleware.
+// flash variable handler middleware.
 app.use(function(req, res, next){
 	if(req.session.flash){
 		res.locals.flash = req.session.flash;
 		log.debug({locals: res.locals}, 'Print locals');
 		delete req.session.flash;
 	}
+
+	if(req.session.cachedAccount){
+		res.locals.cachedAccount = req.session.cachedAccount;
+		delete req.session.cachedAccount;
+	}
+
 	next();
 });
 
-app.set('env', 'development');
-app.set('port', 3002);
-
-// setup subdomain in production time
-//if(app.get('env') === 'production'){
-//	app.use(subdomain('grumbler', require('./controllers/dispatcher')));
-//}else{
-//	app.use(require('./controllers/dispatcher'));
-//}
+app.set('env', config.env);
 
 app.use(require('./controllers/dispatcher'));
 
-app.listen(app.get('port'), function(){
-	log.info('------------------------------');
-	log.info('Express server started in %s on port %s. baseurl=%s', 
-			app.get('env'), app.get('port'), serverConfig.baseurl);
-	log.info('伺服器已啟動');
+app.listen(PORT, function(){
+  log.info('------------------------------');
+  log.info('Express server started in %s on port %s. baseurl=%s', 
+      app.get('env'), PORT, config.baseurl);
+  log.info('伺服器已啟動');
 });
-
-// No longer need https server since we are currently using nginx as reverse proxy.
-//var httpsOpt = {
-//	key: fs.readFileSync(serverConfig.mainkey),
-//	cert: fs.readFileSync(serverConfig.maincert)
-//};
-
-// setup HTTPS server
-//https.createServer(httpsOpt, app).listen(app.get('port'), function(){
-//	log.info('------------------------------');
-//	log.info('Express server started in %s on port %s. baseurl=%s', 
-//			app.get('env'), app.get('port'), serverConfig.baseurl);
-//	log.info('伺服器已啟動');
-//});

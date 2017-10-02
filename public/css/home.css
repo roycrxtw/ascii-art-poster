@@ -41,29 +41,30 @@ body{
 	margin: 0;
 	border: 15px solid snow;
 	padding: 0;
-	background-color: mistyrose;
+	background-color: rgb(159, 197, 198);
 	
-	color: darkslategrey;
+	color: snow;
 	font-size: 4.5vmin;
 	text-decoration: none;
 	transition: all 300ms;
 }
-@media only screen and (min-width: 1024px){
+@media (min-width: 1280px){
 	.block-container .block{
 		float: left;
-		width: 25vw;
-		height: 25vw;
+		width: 23vw;
+		height: 23vw;
 		overflow: hidden;
 		font-size: 3vmin;
-		border: 25px solid snow;
+		border: 20px solid snow;
 	}
 }
 
 .block-container .block:hover{
 	border: 20px solid lightgrey;
 }
-@media only screen and (min-width: 1024px){
+@media only screen and (min-width: 1280px){
 	.block-container .block:hover{
+		color: black;
 		border: 20px solid grey;
 	}
 }
@@ -73,7 +74,7 @@ body{
 }
 @media only screen and (min-width: 1024px){
 	.block-container .block.x2{
-		width: 50vw;
+		width: 46vw;
 	}
 }
 

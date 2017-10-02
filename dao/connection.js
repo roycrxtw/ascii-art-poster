@@ -17,7 +17,7 @@ var log = bunyan.createLogger({
 });
 
 
-// this setting is recommended by mLab.
+// this setting is recommended by mLab.com
 var options = {
 	server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 50000 } },
 	replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS : 50000 } }
@@ -26,17 +26,17 @@ var options = {
 // create a connection to mongodb
 mongoose.Promise = global.Promise;
 mongoose.connect(config.dburl, options);
-var conn = mongoose.connection;
+const conn = mongoose.connection;
 
 // connect events
 conn.once('open', function(){
 	log.info('[mongoose] Mongodb is opened');
 });
 conn.on('disconnected', function(err){
-	log.error({error: err}, '[mongoose] disconnected event.');
+	log.error({err}, '[mongoose] disconnected event.');
 });
 conn.on('error', function(err){
-	log.error({error: err}, '[mongoose] error event.');
+	log.error({err}, '[mongoose] error event.');
 });
 
 exports.conn = conn;

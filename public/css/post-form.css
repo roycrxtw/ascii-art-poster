@@ -3,7 +3,7 @@ form{
 	padding: 0 0 20px 0;
 	background-color: Moccasin;
 }
-@media only screen and (min-width: 1024px){
+@media (min-width: 1280px){
 	form{
 		width: 800px;
 	}
@@ -27,9 +27,9 @@ textarea{
 	margin: auto;
 	padding: 15px;
 	border: 2px solid snow;
-	background-color: Moccasin  ;
+	background-color: Moccasin;
 	outline: none;
-	font-size: 1.4vw;
+	font-size: 16px;
 	font-family: Courier New;
 }
 textarea:focus{
@@ -108,51 +108,76 @@ textarea:focus{
 }
 
 .block-category{
-	display: flex;
-	width: 95%;
-	margin: auto;
-	border: 0px solid snow;
+  display: block;
+  width: 100%;
+	border: 0px solid red;
+}
+@media (min-width: 1280px){
+  .block-category{
+    display: flex;
+    width: 95%;
+    margin: auto;
+  }
 }
 
 .item-category{
-	flex: 1;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 4vw;
-	border: 0px solid red;
-	margin: 5px;
+  display: block;
+  width: 95%;
+  margin: 5px auto;
+  border: 0px solid red;
 	padding: 0 10px;
 	background-color: slategrey;
 	color: snow;
-	font-size: 1.25vw;
+	font-size: 14px;
+}
+@media (min-width: 1280px){
+	.item-category{
+    display: flex;
+    height: 4vw;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+		font-size: 1.25vw;
+	}
 }
 
 .item-category select{
-	font-size: 1.25vw;
-	padding: 10px 5px;
-	margin: 5px;
+  margin: 5px;
+  padding: 10px 5px;
 	background-color: antiquewhite;
-	color: grey;
+  color: grey;
+  font-size: 16px;
+}
+@media (min-width: 1280px){
+  .item-category select{
+    font-size: 1.25vw;
+    padding: 10px 5px;
+    margin: 5px;
+    background-color: antiquewhite;
+    color: grey;
+  }
 }
 
-.item-input{
-	flex: 4;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	border: 0px solid red;
-}
 
 input[name='title']{
-	width: 100%;
-	height: 4vw;
-	padding: 10px;
+  display: block;
+  width: 95%;
+  margin: auto;
+	padding: 15px;
 	background-color: Moccasin  ;
 	outline: none;
-	border: 1px solid snow;
-	font-size: 1.4vw;
+  border: 1px solid snow;
+  font-size: 16px;
 }
 input[name='title']:focus{
 	background-color: oldlace;
+}
+
+@media (min-width: 1280px){
+  input[name='title']{
+		flex: 4;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
 }

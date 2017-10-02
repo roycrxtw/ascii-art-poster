@@ -1,28 +1,43 @@
 
+/**
+ * Project Grumbler
+ * @author Roy Lu(royvbtw)
+ * Sep, 2017
+ */
+
 'use strict';
 
 var conn = require('../dao/connection');
 var userDao = require('../dao/user-dao');
 var postDao = require('../dao/post-dao');
 var serviceData = require('./service-data');
-var mainConfig = require('../config/main.config');
+
 var passwordService = require('./password-service');
 
+let debug = require('debug')('main');
 var request = require('request');
-let debug = require('debug')('main-service');
 
-const LOG_LEVEL = require('../config/main.config').LOG_LEVEL;
-let bunyan = require('bunyan');
-let log = bunyan.createLogger({
+const config = require('../config/main.config');
+const LOG_LEVEL = config.LOG_LEVEL;
+
+let logSettings = [];
+if(config.env === 'production'){
+	logSettings = [
+		{level: LOG_LEVEL, path: 'log/main.log'},
+		{level: 'error', path: 'log/error.log'}
+	];
+}else{
+	logSettings = [
+		{level: 'debug', stream: process.stdout}
+	];
+}
+
+let log = require('bunyan').createLogger({
 	name: 'main-service',
-	streams: [{
-		level: LOG_LEVEL,
-		path: 'log/grumbler.log'
-	}]
+	streams: logSettings
 });
 
 var standardRejectMessage = '服務暫時無法使用，請稍後重試。';
-
 const PAGE_SIZE = 10;
 
 exports.getPostSettings = getPostSettings;
@@ -41,10 +56,9 @@ exports.updateUserName = updateUserName;
 exports.login = login;
 
 exports.createPost = createPost;
-exports.getPost = getPost;
-exports.updatePost = updatePost;
 exports.deletePost = deletePost;
 exports.countPosts = countPosts;
+
 
 function getPostSettings(){
 	let data = {};
@@ -53,32 +67,42 @@ function getPostSettings(){
 	return data;
 }
 
+/**
+ * Count post amount for the given uid
+ * @param {string} uid User id
+ * @param {boolean} ignoreExpiry 
+ * @return {number} Post count Return -1 if counting has error.
+ */
 async function countPosts({uid, ignoreExpiry = false} = {}){
-	log.debug({uid: uid, ignoreExpiry: ignoreExpiry}, 'countPosts() start.');
-	try{
-		let opt = {};
-		
-		if(uid){
-			opt['user.authId'] = uid;
-		}
-		
-		if(!ignoreExpiry){
-			opt.expiry = {$gte: new Date()};
-		}
-		log.debug({opt: opt}, 'countPost(): print opt');
+	debug(`countPosts() started: uid=${uid}, ignoreExpiry=${ignoreExpiry}`);
 	
-		let count = await postDao.countPosts(opt);
+	let opt = {};
+	
+	if(uid){
+		opt['user.authId'] = uid;
+	}
+	
+	if(!ignoreExpiry){
+		opt.expiry = {$gte: new Date()};
+	}
+	debug(`countPost(): ${opt}`);
+
+	try{
+		const count = await postDao.countPosts(opt);
 		log.debug('countPosts()=%s', count);
 		return count;
 	}catch(ex){
-		log.error({error: ex.stack}, 'Error in countPage()');
+		log.error({ex: ex.stack}, 'Error in countPage()');
 		return -1;
 	}
 }
 
+
 /**
  * Wrapper function
- * @param {*} profile 
+ * To create and/or login Facebook user. The argument is a profile object 
+ * parsed by passport-facebook module.
+ * @param {object} profile 
  */
 async function createAndLoginFbUser(profile){
 	return await createAndLoginOAuthUser(profile, 'fb');
@@ -86,8 +110,8 @@ async function createAndLoginFbUser(profile){
 
 /**
  * To create and/or login Google OAuth user. User info(google id, name and 
- * email will be stored into database.
- * @param {object} profile object. Parsed by passport-google module.
+ * email) will be stored into database.
+ * @param {object} profile Parsed by passport-google module.
  * @return {object}
  */
 async function createAndLoginGoogleUser(profile){
@@ -96,18 +120,15 @@ async function createAndLoginGoogleUser(profile){
 
 
 /**
- * To create and/or login Facebook user. The argument is a profile object 
- * parsed by passport-facebook module.
- * @param {Object} profile object. Parsed by passport-facebook module.
+ * @param {object} profile Parsed by passport module.
  * @param {string} prefix
- * @return {Object} 
+ * @return {object} 
  */
 async function createAndLoginOAuthUser(profile, prefix){
+	debug('createAndLoginOAuthUser() started.');
+	//log.debug({profile}, 'createAndLoginOAuthUser() started');
 	try{
-		debug('in createAndLoginOAuthUser');
-		log.debug({profile: profile}, 'createAndLoginOAuthUser()');
-		
-		let preparedUser = {
+		const preparedUser = {
 			authId: prefix + ':' + profile.id,
 			name: profile['_json'].name,
 			password: null,
@@ -115,12 +136,12 @@ async function createAndLoginOAuthUser(profile, prefix){
 			created: new Date(),
 			avator: 'nopath'	// Pre-reserved field.
 		};
-		debug('preparedUser=', preparedUser);
+		debug('createAndLoginOAuthUser() preparedUser=', preparedUser);
 
 		let result = {};
-		let query = await userDao.findUserById(preparedUser.authId);
+		const query = await userDao.findUserById(preparedUser.authId);
 		if(query){
-			debug('User exists. Return user info.');
+			debug('createAndLoginOAuthUser(): user exists. query=', query);
 			result.authId = query.authId;
 			result.name = query.name;
 		}else{
@@ -131,7 +152,7 @@ async function createAndLoginOAuthUser(profile, prefix){
 		debug('result=', result);
 		return result;
 	}catch(ex){
-		log.error({error: ex.stack}, 'Error in createAndLoginFbUser(): doCreateUser');
+		log.error({ex: ex.stack}, 'Error in createAndLoginOAuthUser()');
 		return false;
 	}
 }
@@ -140,31 +161,32 @@ async function createAndLoginOAuthUser(profile, prefix){
 /**
  * 前導函式
  * @param {object} user
- * @return {Object} true if creation success.
+ * @return {object} true if creation success.
  */
 async function createAppUser(user){
-	try{
-		let salt = await passwordService.generateSalt(10);
-		let hash = await passwordService.hash(user.password, salt);
 
-		let preparedUser = {
-			authId: 'app:' + user.account,
-			name: user.name,
-			password: hash,
-			email: user.email || '0',
-			created: new Date(),
-			avator: 'nopath'	// Pre-reserved field.
-		};
-		
-		let result = await doCreateUser(preparedUser);
-		//#todo-roy: what value do I have to return?
-		// Does it have to return the created user?
-		return result;
-	}catch(ex){
-		log.error({error: ex.stack}, 'Error in createAppUser(): doCreateUser');
-		return false;
-	}
+  const salt = await passwordService.generateSalt(10);
+  const hash = await passwordService.hash(user.password, salt);
+
+  const preparedUser = {
+    authId: 'app:' + user.account,
+    name: user.name,
+    password: hash,
+    email: user.email || '0',
+    created: new Date(),
+    avator: 'nopath'	// Pre-reserved field.
+  };
+
+  try{
+    const result = await doCreateUser(preparedUser);
+    debug('createAppUser(): after creation, result=', result);
+    return result;
+  }catch(ex){
+    log.error({ex: ex.stack}, 'Error in createAppUser(): doCreateUser');
+    return false;
+  }
 }
+
 
 /**
  * Format date to yyyy/mm/dd-hh:mm
@@ -176,6 +198,7 @@ function formatDate(d){
 			+ d.getDate() + ', ' + d.getHours() + ':' + d.getMinutes();
 	return formattedDate;
 }
+
 
 /**
  * Validate user data(account, password, email) by regex patterns.
@@ -219,7 +242,7 @@ function validateUserFields(user, opt){
 
 /**
  * 
- * @return {result} object
+ * @return {object} information about this project.
  */
 async function about(){
 	try{
@@ -227,12 +250,13 @@ async function about(){
 		result.userCount = await userDao.countUsers();
 		result.postCount = await countPosts();
 		result.allPostCount = await countPosts({ignoreExpiry: true});
-		log.debug({result: result}, 'about() finished.');
+		debug({result}, 'about() finished.');
 		return result;
 	}catch(ex){
-		log.error({error: ex.stack}, 'Error in about().');
+		log.error({ex: ex.stack}, 'Error in about().');
 	}
 }
+
 
 /**
  * 
@@ -241,22 +265,22 @@ async function about(){
  */
 function createPost(post){
 	return new Promise( (resolve, reject) => {
-		log.debug({post: post}, 'createPost() started.');
+		debug({post}, 'createPost() started.');
 		
 		// verify the google re-captcha
 		var recaptchaOptions = {
 			url: 'https://www.google.com/recaptcha/api/siteverify',
 			form: {
-				secret: mainConfig.recaptchaSecret,
+				secret: config.recaptchaSecret,
 				response: post.verify
 			}
 		};
 		
-		log.trace({recaptchaOpt: recaptchaOptions}, 'createPost(): Print recaptchaOptions');
+		debug({recaptchaOptions}, 'createPost(): Print recaptchaOptions');
 		
 		request.post(recaptchaOptions, function (error, response, body) {
 			if(error){
-				log.error({error: error, errorStack: error.stack}, 'Error in recaptcha verification.');
+				log.error({error, errorStack: error.stack}, 'Error in recaptcha verification.');
 				return reject('Google re-captcha error.');
 			}
 			var verifyResult = JSON.parse(body);
@@ -273,15 +297,16 @@ function createPost(post){
 					expiry: new Date(new Date().getTime() + serviceData.expiryTypes[post.expiry].offset),
 					anonymous: post.ghost
 				};
-				log.trace({preparedPost: preparedPost}, 'createPost(): Print preparedPost');
+        debug({preparedPost}, 'createPost(): Print preparedPost');
+        
 				postDao.createPost(preparedPost).then( ()=> {
 					return resolve('ok');
 				}).catch( ex => {
-					log.error({error: ex.stack}, 'Error in createPost()');
+					log.error({ex: ex.stack}, 'Error in createPost()');
 					return reject('error');
 				});
 			}else{
-				log.info('Google re-captcha check is failed.');		//#roy-todo: check the google doc
+				log.info('Google re-captcha check is failed.');		// #todo: check the google doc
 				return reject('Google re-captcha is invalid...');
 			}
 		});
@@ -290,109 +315,111 @@ function createPost(post){
 
 
 /**
- * #todo-roy: need to review and unit-test.
  * Check if user is exist and create it.
- * @param {Object} user object
+ * @param {object} user object
  * @return {boolean} true if creation success, false if it's failed.
  */
 async function doCreateUser(user){
 	try{
-		log.debug({user: user}, 'doCreateUser() started.');
-		let result = await userDao.findUserById(user.authId);
-		if(result){
-			// 本帳號已存在，請重新設定
-			//return {flag: false, message: '本帳號已存在，請重新設定'};
+		debug({user}, 'doCreateUser() started.');
+		const result = await userDao.findUserById(user.authId);
+		if(result){		// the account does exist.
 			return {failed: '本帳號已存在，請重新設定'};
 		}else{
-			// the user is not exist, continue to create the user
-			let newUser = await userDao.createUser(user);
-			return newUser;
+			// the user does not exist, continue to create the user
+			return await userDao.createUser(user);
 		}
 	}catch(ex){
-		log.error({error: ex.stack}, 'Error in doCreateUser()');
-		return reject('User register failed');
+		log.error({ex: ex.stack}, 'Error in doCreateUser()');
+		return {failed: 'User register failed'};
 	}
 };
 
-//#todo: 需要修改args為object型態
-function deletePost(postId, currentId){
-	// check if currentId === post.user.authId
-	return new Promise( (resolve, reject) => {
-		postDao.getPost(postId).then( (doc) => {
-			if(doc.user.authId !== currentId){
-				return reject('ID不相符');
+
+/**
+ * Delete a post for the given postId
+ * @param {string} postId Target post id
+ * @param {string} uid Current user id
+ * @return {object} Return an ok object if delete success, 
+ * or return a failed object when delete failed.
+ */
+async function deletePost({postId, uid} = {}){
+	try{
+		const ownerId = await postDao.readPost(postId).user.authId;
+		debug({ownerId}, 'deletePost(), print ownerId of this post.');
+	
+		if(ownerId === uid){
+			const flag = await postDao.deletePost(postId);
+			if(flag){
+				return {ok: 'Delete ok'};
 			}else{
-				postDao.deletePost(postId).then( () => {
-					return resolve('ok');
-				}).catch( (ex) => {
-					return reject('failed');
-				});
+				return {failed: 'Delete failed'};
 			}
-		}).catch( (ex) => {});
-	});
+		}else{
+			return {failed: 'ID不相符'}
+		}
+	}catch(ex){
+		log.error({args: arguments, ex: ex.stack}, 'Error in main.deletePost()');
+		return {failed: 'Error'}
+	}
 }
+
 
 /**
  * 
- * @param {object} user
- * @return {Promise}
+ * @param {string} uid User id
+ * @return {boolean} true if delete success.
  */
 async function deleteUser(uid){
-	log.info('deleteUser(%s) started', uid);
+	log.info(`deleteUser(${uid}) started.`);
 	try{
-		await userDao.deleteUserById(uid);
-		log.info('deleteUser() finished.');
+		return await userDao.deleteUserById(uid);
 	}catch(ex){
-		log.error({error: ex}, 'Error in deleteUser()');
+		log.error({uid, ex: ex.stack}, 'Error in deleteUser()');
 	}
 }
 
-//#todo-roy
-function getPost(postId){}
 
 async function doGetPosts(conditions){
-	log.debug({conditions: conditions}, 'doGetPosts() started.');
-	let posts = await postDao.listPosts(conditions);
-	log.trace('doGetPosts(): posts.length=%s', posts.length);
-	var d = new Date();
-	for(var i in posts){
-		//console.log('post[%s]=', i, posts[i]);
-		posts[i].postId = posts[i]._id;	// remap _id to postId
-		delete posts[i]._id;
-		
-		if(posts[i].anonymous){
-			posts[i].user.authId = '0';
-			posts[i].user.name = '這是個忍者!';
-		}
-		delete posts[i].anonymous;
-		
-		if(posts[i].category === undefined){
-			posts[i].category = '無';
-		}
-		posts[i].created = formatDate(posts[i].created);
-		if(posts[i].expiry){
-			if(posts[i].expiry < d){
-				posts[i].isExpired = true;
-			}
-			posts[i].expiry = formatDate(posts[i].expiry);
-		}
-		//console.log('[service] Modified doc[%s]=', i, docs[i]);
-	}
-	return posts;
+  log.debug({conditions}, 'doGetPosts() started.');
+  try{
+    let posts = await postDao.listPosts(conditions);
+    debug('doGetPosts(): posts.length=%s', posts.length);
+    var current = new Date();
+    for(var i in posts){
+      posts[i].postId = posts[i]._id;	// re-map _id to postId
+      delete posts[i]._id;
+      
+      if(posts[i].anonymous){
+        posts[i].user.authId = '0';
+        posts[i].user.name = '這是個忍者!';
+      }
+      delete posts[i].anonymous;
+      
+      if(posts[i].category === undefined){
+        posts[i].category = '無';
+      }
+      posts[i].createdAt = formatDate(posts[i].created);
+      if(posts[i].expiry){
+        if(posts[i].expiry < current){
+          posts[i].isExpired = true;
+        }
+        posts[i].expiry = formatDate(posts[i].expiry);
+      }
+    }
+    return posts;
+  }catch(ex){
+    log.error({conditions, ex: ex.stack}, 'Error in doGetPosts()');
+  }
 }
 
-async function queryPosts({uid, pageNo = 1, pageSize} = {}){
-	pageNo = Number(pageNo);
-	if(isNaN(pageNo)){
-		pageNo = 1;
-	}
+
+async function queryPosts({uid, page = 1, pageSize} = {}){
+	page = (parseInt(page) > 0)? parseInt(page): 1;
 	pageSize = (pageSize >= PAGE_SIZE)? pageSize: PAGE_SIZE;
 	
 	let conditions = {
-		query: {
-			//'user.authId': 'fb:1645788332105202',
-			//expiry: {$gt: new Date()}
-		},
+		query: {},
 		limit: pageSize
 	};
 	if(uid){
@@ -403,28 +430,28 @@ async function queryPosts({uid, pageNo = 1, pageSize} = {}){
 	}
 	
 	try{
-		let postCount = await countPosts({
+		const postCount = await countPosts({
 			uid: uid, 
 			ignoreExpiry: (uid)? true: false
-		});
-		let pageCount = Math.ceil(postCount / pageSize);
+    });
+    
+		const pageCount = Math.ceil(postCount / pageSize);
 		
-		pageNo = (pageNo > pageCount)? pageCount: pageNo;
-		conditions.skip = (pageNo - 1) * pageSize;
+		page = (page > pageCount)? pageCount: page;
+		conditions.skip = (page - 1) * pageSize;
 		
 		let result = {};
 		result.posts = await doGetPosts(conditions);
-		//#roy-todo: what to do if no any result?
-		result.currentPage = pageNo;
+		result.currentPage = page;
 		result.pageCount = pageCount;
 		result.postCount = postCount;
 
 		// deal with pagination.
 		result.page = {};
-		result.page.first = (pageNo === 1)? null: 1;
-		result.page.next = (pageNo < pageCount)? (pageNo + 1): null;
-		result.page.prev = (pageNo > 1)? (pageNo - 1): null;
-		result.page.last = (pageNo === pageCount)? null: pageCount;
+		result.page.first = (page === 1)? null: 1;
+		result.page.next = (page < pageCount)? (page + 1): null;
+		result.page.prev = (page > 1)? (page - 1): null;
+		result.page.last = (page === pageCount)? null: pageCount;
 		return result;
 	}catch(ex){
 		log.error({error: ex.stack}, 'Error in queryPosts()');
@@ -432,13 +459,14 @@ async function queryPosts({uid, pageNo = 1, pageSize} = {}){
 	}
 }
 
+
 /**
  * 
  * @param {string} uid
  * @return {user|result} null if no such user
  */
 async function getUser(uid){
-	log.debug('getUser(%s) started.', uid);
+	debug('getUser(%s) started.', uid);
 	if(uid === '0'){
 		let result = {};
 		result.name = '這是個忍者';
@@ -448,18 +476,19 @@ async function getUser(uid){
 	if(!validateUserFields({id: uid}, {id: true})){
 		log.error('不該有這個id:', uid);
 		let result = {};
-		result.name = '不該有這id';	//#roy-todo: need to test
+		result.name = '不該有這id';
 		return result;
 	}
 	
 	try{
-		let user = await userDao.findUserById(uid);
-		log.debug({user: user}, 'getUser(%s) finished.', uid);
+		const user = await userDao.findUserById(uid);
+		debug({user, arg: uid}, 'getUser() finished.');
 		return user;
 	}catch(ex){
 		log.error({error: ex}, 'Error in getUser().');
 	}
 }
+
 
 /**
  * wrapper function.
@@ -468,12 +497,12 @@ async function getUser(uid){
  */
 async function getUserInfo(uid){
 	try{
-		log.debug('getUserInfo(%s) start', uid);
+		debug('getUserInfo(%s) start', uid);
 		let result = {};
 		result.user = await getUser(uid);
-		log.debug({'result.user': result.user}, 'getUserInfo(): Print result.user');
+		debug({'result.user': result.user}, 'getUserInfo(): Print result.user');
 		if(!result.user){
-			log.debug('getUserInfo(%s): No such user.', uid);
+			debug('getUserInfo(%s): No such user.', uid);
 			return false;
 		}
 		result.postCount = await countPosts({uid: uid});
@@ -484,12 +513,13 @@ async function getUserInfo(uid){
 	}
 }
 
+
 /**
- * 
- * @param {user} user object
- * @return {object} user object
+ * @param {string} account
+ * @param {string} password
+ * @return {object} Return an ok object if login success, or a failed object when login failed.
  */
-async function login(user){
+async function login({account, password} = {}){
 	try{
 		// #todo-roy: validate function doesn't test
 		// vaildate the login account first.
@@ -498,16 +528,17 @@ async function login(user){
 //			return {failed: '帳號或密碼格式錯誤'};
 //		}
 		
-		debug('in login(user): user=%s', user);
+		debug(`main.login() started: account=${account}, pwd=${password}`);
 		
-		let result = await userDao.findUserById('app:' + user.account);
+		const result = await userDao.findUserById('app:' + account);
+		debug('Print result=', result);
 		if(result === null){
-			log.debug({'user.account': user.account}, 'login(): No such account exist.');
+			debug({'login account': account}, 'login(): No such account exist.');
 			return {failed: '帳號(或密碼)錯誤'};
 		}
 		
-		if(await passwordService.compare(user.password, result.password) === true){
-			log.debug('login(): %s login success.', user.account);
+		if(await passwordService.compare(password, result.password) === true){
+			debug(`main.login(): ${account} login success.`);
 			return {ok: 'login success', authId: result.authId, name: result.name};
 		}else{
 			log.debug('login(): Password error.');
@@ -515,30 +546,30 @@ async function login(user){
 		}
 	}catch(ex){
 		log.error({error: ex.stack}, 'Error in login()');
-		return {failed: 'ERROR'};	// security:不要單單使用[帳號錯誤]
+		return {failed: 'error'};	// security: 不要單單使用[帳號錯誤]
 	}
 }
 
-//#todo-roy
-function updatePost(post){}
 
 /**
- * Update user collection and a user sub-doc in post collection.
+ * Update user collection and all user sub-doc in post collection.
  * @param {object} user
- * @return {Promise}
+ * @return {object} Return an ok object if update success.
  */
 async function updateUserName(user){
 	try{
-		log.debug({user: user}, 'updateUserName() started');
+		debug({user}, 'updateUserName() started');
 		if(!validateUserFields(user, {name: true})){
 			log.debug('updateUserName(): 資料驗證失敗');
-			return {ok: false, msg: '更新資料失敗，請確認資料'};
+			return {failed: '更新資料失敗，請確認資料'};
 		}
 		await userDao.updateUser(user);
-		await postDao.updatePost({'user.authId': user.authId}, {'user.name': user.name});
-		return {ok: true, msg: 'Update success'};
+		const criteria = {'user.authId': user.authId};
+		const post = {'user.name': user.name};
+		await postDao.updatePost({criteria, post});
+		return {ok: 'Update success'};
 	}catch(ex){
-		log.error({error: ex.stack, user: user}, 'Error in updateUserName()');
-		return {ok: false, msg: '更新資料失敗，請重新送出'};
+		log.error({user, error: ex.stack}, 'Error in main.updateUserName()');
+		return {failed: '更新資料失敗，請重新送出'};
 	};
 }
