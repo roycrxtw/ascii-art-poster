@@ -1,0 +1,30 @@
+
+p{
+	text-align: center;
+}
+
+.navi{
+	display: inline-block;
+	border: 1px solid lightgray;
+	border-radius: 5px;
+	padding: 10px;
+}
+
+.navi-button{
+	display: inline-flex;
+	width: 100px;
+	height: 60px;
+	margin: 10px;
+	border-bottom: 10px solid grey;
+	background-color: lightgrey;
+	justify-content: center;
+	align-items: center;
+	color: snow;
+	font-size: 16px;
+	text-decoration: none;
+	transition: all 500ms;
+}
+.navi-button:hover{
+	color: grey;
+	background-color: snow;
+}

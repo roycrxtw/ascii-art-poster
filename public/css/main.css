@@ -7,11 +7,10 @@
 html{
 	font-family: "Microsoft JhengHei";
 	font-size: 14px;	/* the min value*/
-	/*font-size: 3.5vmin;*/
 }
-@media only screen and (min-width: 1024px){
+@media (min-width: 720px){
 	html{
-		font-size: 2.5vmin;
+		font-size: 15px;
 	}
 }
 
@@ -36,6 +35,7 @@ footer{
 a:not([class]){
 	margin: 0;
 	padding: 0;
+	color: lightsalmon;
 	text-decoration: none;
 	transition: all 500ms;
 }
@@ -105,8 +105,7 @@ span[data-info]:hover::before {
 .block-xauth-note{
 	display: none;
 }
-
-@media only screen and (min-width: 768px){
+@media (min-width: 720px){
 	.block-xauth-note{
 		position: absolute;
 		display: flex;
@@ -157,25 +156,6 @@ span[data-info]:hover::before {
 }
 
 
-.block-little{
-	display: inline-flex;
-	width: 100px;
-	height: 100px;
-	margin: 10px;
-	border-radius: 10px;
-	background-color: #3bb0de;
-	justify-content: center;
-	align-items: center;
-	color: snow;
-	font-size: 16px;
-	text-decoration: none;
-}
-.block-little:hover{
-	color: snow;
-	background-color: #2196c4;
-	box-shadow: 0 0 50px 50px gray inset;
-}
-
 .btnFlashClose{
 	position: absolute;
 	right: 0px;
@@ -184,14 +164,11 @@ span[data-info]:hover::before {
 	cursor: pointer;
 }
 
-
-
-
 .flash-container{
 	width: 95%;
 	padding: 0;
 }
-@media only screen and (min-width: 1024px){
+@media (min-width: 720px){
 	.flash-container{
 		width: 100%;
 		padding-left: 250px;
@@ -210,7 +187,7 @@ span[data-info]:hover::before {
 	color: snow;
 	cursor: pointer;
 }
-@media only screen and (min-width: 1024px){
+@media (min-width: 720px){
 	.flash{
 		width: 400px;
 		padding: 10px;
@@ -222,6 +199,17 @@ span[data-info]:hover::before {
 	color: snow;
 }
 
+@media (min-width: 720px){
+	.content-about{
+		margin-left: 100px;	
+	}
+	
+	.content-about h1{
+		text-align: left;
+	}
+}
+
+
 
 .panel{
 	width: 95%;
@@ -231,7 +219,7 @@ span[data-info]:hover::before {
 	border-radius: 5px;
 	box-shadow: 0 0 3px 0 lightcoral;
 }
-@media only screen and (min-width: 768px){
+@media (min-width: 720px){
 	.panel{
 		width: 350px;
 	}
@@ -256,7 +244,7 @@ span[data-info]:hover::before {
 	padding: 0px;
 	text-align: center;
 }
-@media only screen and (min-width: 1024px){
+@media (min-width: 720px){
 	.viewBody{
 		position: relative;
 		width: 80vw;
@@ -287,13 +275,13 @@ span[data-info]:hover::before {
 	font-weight: 100;
 	transition: all 500ms;
 }
-@media only screen and (min-width: 1024px){
+@media (min-width: 720px){
 	.menu{
 		position: fixed;
-		width: 17vw;
-		min-height: 100%;
 		left: 0;
 		top: 0;
+		width: 17vw;
+		min-height: 100%;
 		background-color: snow;
 		color: slategrey;
 		font-size: 2.5vmin;
@@ -321,7 +309,7 @@ span[data-info]:hover::before {
 	padding: 1px;
 }
 
-@media only screen and (min-width: 1024px){
+@media (min-width: 720px){
 	.menu ul{
 		width: 100%;
 		margin: auto;
@@ -350,7 +338,7 @@ span[data-info]:hover::before {
 	color: white;
 	background-color: #c5ccd3;
 }
-@media only screen and (min-width: 1024px){
+@media (min-width: 720px){
 	.menu nav a{
 		display: inline-block;
 		color: black;
@@ -370,7 +358,7 @@ span[data-info]:hover::before {
 	border: 1px solid snow;
 	text-align: center;
 }
-@media only screen and (min-width: 1024px){
+@media (min-width: 720px){
 	.menu .displayName{
 		width: 100%;
 		padding: 10px 0 10px 55px;
@@ -382,7 +370,7 @@ span[data-info]:hover::before {
 .menu-footer{
 	display: none;
 }
-@media only screen and (min-width: 1024px){
+@media (min-width: 720px){
 	.menu-footer{
 		display: block;
 		position: absolute;
@@ -411,7 +399,7 @@ span[data-info]:hover::before {
 	text-align: center;
 	text-decoration: none;
 }
-@media only screen and (min-width: 1024px){
+@media (min-width: 720px){
 	.menu .title{
 		display: block;
 		margin: 0;

@@ -397,7 +397,7 @@ router.get("/register-done", function(req, res, next){
 
 // handle 404 issues
 router.use(function(req, res, next){
-	res.render('404');
+	res.render('404',  {css: ['404']});
 });
 
 router.use(function(err, req, res, next){

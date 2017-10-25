@@ -11,7 +11,7 @@ form{
 	font-size: 14px;
 	transition: all 500ms;
 }
-@media only screen and (min-width: 768px){
+@media (min-width: 720px){
 	form{
 		width: 400px;
 	}

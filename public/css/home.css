@@ -10,29 +10,30 @@ body{
 	
 	background-color: snow;
 }
-@media only screen and (min-width: 1024px){
+@media (min-width: 720px){
 	.viewBody{
 		width: 80vw;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		align-content: center;
+		border: 0px solid red;
 		background-color: snow;
 	}
 }
 
-.block-container{
+.tile-container{
 	display: block;
-	width: 92vw;
+	width: 100%;
 	margin: auto;
 	border: 0px solid red;
 	padding: 0;
 }
 
-.block-container .block{
-	display: block;
-	position: relative;
+.tile-container .tile{
 	float: left;
+	position: relative;
+	display: block;
 	width: 45vw;
 	height: 45vw;
 	justify-content: center;
@@ -48,8 +49,8 @@ body{
 	text-decoration: none;
 	transition: all 300ms;
 }
-@media (min-width: 1280px){
-	.block-container .block{
+@media (min-width: 720px){
+	.tile-container .tile{
 		float: left;
 		width: 23vw;
 		height: 23vw;
@@ -59,26 +60,26 @@ body{
 	}
 }
 
-.block-container .block:hover{
+.tile-container .tile:hover{
 	border: 20px solid lightgrey;
 }
-@media only screen and (min-width: 1280px){
-	.block-container .block:hover{
+@media (min-width: 720px){
+	.tile-container .tile:hover{
 		color: black;
 		border: 20px solid grey;
 	}
 }
 
-.block-container .block.x2{
+.tile-container .tile.x2{
 	width: 90vw;
 }
-@media only screen and (min-width: 1024px){
-	.block-container .block.x2{
+@media (min-width: 720px){
+	.tile-container .tile.x2{
 		width: 46vw;
 	}
 }
 
-.block .block-icon{
+.tile-icon{
 	display: flex;
 	width: 100%;
 	height: 60%;
@@ -87,20 +88,20 @@ body{
 	align-items: center;
 }
 
-.block .block-caption{
+.block-caption{
 	width: 100%;
 	height: 40%;
 	border: 0px solid blue;
 }
 
-.block .block-icon img{
+.tile-icon img{
 	width: 15vw;
 	height: 15vw;
 	border: 1px solid lightgrey;
 	border-radius: 10px;
 }
-@media only screen and (min-width: 1024px){
-	.block .block-icon img{
+@media (min-width: 720px){
+	.tile-icon img{
 		width: 6vw;
 		height: 6vw;
 		box-shadow: 0 0 5px 0 grey;
@@ -108,7 +109,7 @@ body{
 }
 
 
-.block .block-extra{
+.block-extra{
 	display: flex;
 	position: absolute;
 	left: 0;
@@ -123,6 +124,6 @@ body{
 	transition: all 500ms;
 }
 
-.block .block-extra:hover{
+.block-extra:hover{
 	opacity: 1;
 }

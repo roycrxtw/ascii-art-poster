@@ -1,12 +1,12 @@
 
-<div class='block-page'>
-<div class='title'>{{#if isOwner}}您的文章列表{{else}}負能量合輯{{/if}}</div>
-<div class='page-tile page-number'>{{currentPage}}/{{pageCount}}頁</div>
-<div class='page-tile page-info'>{{postCount}}篇文章</div>
-{{#if page.first}}<a class='page-tile btn' href='{{path}}/1'>第一頁</a>{{/if}}
-{{#if page.prev}}<a class='page-tile btn' href='{{path}}/{{page.prev}}'>前一頁</a>{{/if}}
-{{#if page.next}}<a class='page-tile btn' href='{{path}}/{{page.next}}'>下一頁</a>{{/if}}
-{{#if page.last}}<a class='page-tile btn' href='{{path}}/{{page.last}}'>最末頁</a>{{/if}}
+<div class='list-navi'>
+	<div class='title'>{{#if isOwner}}您的文章列表{{else}}負能量合輯{{/if}}</div>
+	<div class='navi-tile page-number'>{{currentPage}}/{{pageCount}}頁</div>
+	<div class='navi-tile page-info'>{{postCount}}篇文章</div>
+	{{#if page.first}}<a class='navi-tile navi-button' href='{{path}}/1'>第一頁</a>{{/if}}
+	{{#if page.prev}}<a class='navi-tile navi-button' href='{{path}}/{{page.prev}}'>前一頁</a>{{/if}}
+	{{#if page.next}}<a class='navi-tile navi-button' href='{{path}}/{{page.next}}'>下一頁</a>{{/if}}
+	{{#if page.last}}<a class='navi-tile navi-button' href='{{path}}/{{page.last}}'>最末頁</a>{{/if}}
 </div>
 
 <div class='masonry'>
@@ -20,11 +20,13 @@
 		{{else}}
 			<div class='post-title'>{{this.title}}</div>
 		{{/if}}
-		<div class='post-author'><a class='link-author' href='/user/{{this.user.authId}}'>{{this.user.name}}</a> @{{this.createdAt}}</div>
+		<div class='post-author'>
+			<a class='link-author' href='/user/{{this.user.authId}}'>{{this.user.name}}</a> @{{this.createdAt}}
+		</div>
 	</div><!-- end of post-header -->
 
-	<div class='content'><pre><code>{{this.content}}</code></pre>
-		<div class='info'>
+	<div class='post-content'><pre><code>{{this.content}}</code></pre>
+		<div class='post-info'>
 			<a href='/post/{{this.postId}}'>#</a>
 			{{#if this.expiry}}文章期限: {{this.expiry}}{{/if}}
 		</div>
@@ -53,6 +55,4 @@ $(document).ready(function(){
 		targetPost.find('.content').fadeIn(333);
 	});
 });
-
-
 </script>

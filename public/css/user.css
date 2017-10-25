@@ -9,7 +9,7 @@
 	
 	color: brown;
 }
-@media only screen and (min-width: 768px){
+@media (min-width: 720px){
 	.form-plain{width: 600px;}
 }
 .form-plain input{
@@ -30,7 +30,7 @@
 	width: 100px;
 	color: snow;
 	margin: 5px;
-	border: 1px solid snow;
+	border: 1px solid grey;
 	border-radius: 3px;
 	padding: 5px;
 	background-color: indianred;
