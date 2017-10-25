@@ -7,13 +7,21 @@
 
 'use strict';
 
-const LOG_LEVEL = require('../config/main.config').LOG_LEVEL;
+const config = require('../config/main.config');
+
+let logSettings = [];
+if(config.env === 'production'){
+	logSettings = [
+		{level: config.LOG_LEVEL, path: 'log/post-dao.log'},
+		{level: 'error', path: 'log/error.log'}
+	];
+}else{
+	logSettings = [{level: 'debug', stream: process.stdout}];
+}
+
 var log = require('bunyan').createLogger({
 	name: 'post-dao',
-	streams: [{
-		level: LOG_LEVEL,
-		path: 'log/grumblers.log'
-	}]
+	streams: logSettings
 });
 
 var postModel = require('../models/post');

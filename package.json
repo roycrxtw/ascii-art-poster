@@ -4,10 +4,11 @@
   "description": "Good place for grumbling",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "mocha"
   },
   "author": "Roy Lu (royvbtw)",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
