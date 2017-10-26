@@ -142,11 +142,10 @@ span[data-info]:hover::before {
 	margin: 5px;
 	border-radius: 10px;
 	box-shadow: 0 0 5px 0 indigo;
-	padding: 10px;
 	background: snow;
+	padding: 10px;
 	color: slategray;
-	align-items: center;
-	justify-content: center;
+	text-decoration: none;
 	transition: all 500ms;
 }
 .btn-xauth:hover{

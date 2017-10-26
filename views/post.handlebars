@@ -25,22 +25,17 @@
   <span data-info='不顯示名字'><label class='cbLabel'>
     <input type="checkbox" name="ghost" value="true" {{#if post.ghost}}checked{{/if}}>匿名發表
   </label></span>
-  <div class="g-recaptcha" data-callback="enableBtn" 
+  <div class="g-recaptcha" data-callback="enableSubmitButton" 
       data-sitekey='{{recaptchaSiteKey}}'></div>
   <button class="btnSubmit" disabled/>請先點選上方驗證</button>
 </form>
 
 <script>
-function enableBtn(){
-	//$('.btnSubmit').css('display', 'block');
-	//$('.btnSubmit').removeAttr('disabled');
+function enableSubmitButton(){
 	setTimeout( ()=> {
 		$('.btnSubmit').removeAttr('disabled');
 		$('.btnSubmit').html('發表');
 		$('.btnSubmit').addClass('btnSubmit-ok');
 	}, 800);
-	
-	//$('.btnSubmit').removeAttr('disabled');
 }
-
 </script>

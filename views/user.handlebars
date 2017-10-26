@@ -25,15 +25,17 @@ $('.btn-deleteUser').on('click', () => {
 		$.ajax({
 			url: '/user',
 			method: 'POST',
-			data: {'action': 'delete', 
-					'authId': '{{user.authId}}'},
+			data: {
+        'action': 'delete', 
+				'authId': '{{user.authId}}'
+      },
 			statusCode: {
 				200: function(){
-					window.location = '/home';
+          window.location = '/home';
 				}
 			}
 		}).done(function(){
-			alert('Delete success.');
+      alert('Delete success.');
 		});
 	}
 });

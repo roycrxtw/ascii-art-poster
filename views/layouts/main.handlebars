@@ -21,7 +21,7 @@
 	<a class='title' href='/'>Grumbler</a>
 	<nav>
 		<ul>
-			<li><a class='menu-btn' href='/'>home</a></li>
+		  <li><a class='menu-btn' href='/'>home</a></li>
 			<li><a class='menu-btn' href='/list'>抱怨大全</a></li>
 			<li><a class='menu-btn' href='/post'>開始抱怨</a></li>
 			<li><a class='menu-btn' href='/about'>關於這裡</a></li>
@@ -38,7 +38,9 @@
 	
 	{{#if uid}}<div class='displayName'>welcome, {{displayName}}!</div>{{/if}}
 	
-	<div class='menu-footer'><a href='https://github.com/royvbtw/grumbler'>github</a><br/>Roy Lu, 2017</div>
+  <div class='menu-footer'>
+    <a href='https://github.com/royvbtw/grumbler'>github</a><br/>Roy Lu, 2017
+  </div>
 	
 </div><!-- end of menu -->
 
@@ -46,7 +48,7 @@
 <div class='flash'>{{flash}}<span class='btnFlashClose'>x</span></div></div>{{/if}}
 
 <div class="viewBody">
-	{{{body}}}
+  {{{body}}}
 </div>
 
 </body>
