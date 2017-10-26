@@ -1,6 +1,9 @@
 
-// DAO testing.
-// or even 整合測試?
+/**
+ * Test for UserDAO and UserModel
+ * @author Roy Lu
+ * June, 2017
+ */
 
 var expect = require('chai').expect;
 var mongoose = require('mongoose');
@@ -13,7 +16,7 @@ before(async function(){
 	this.timeout(5000);
 	mongoose.Promise = global.Promise;
 	
-	await mongoose.connect('mongodb://root:root87@ds123182.mlab.com:23182/demo', function(err){
+	await mongoose.connect('mongodb://localhost:27017/testGrumbler', function(err){
 		console.log('connected');
 	});
 	
