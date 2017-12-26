@@ -4,16 +4,16 @@
   "description": "Good place for grumbling",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "nodemon index.js",
     "test": "mocha -c"
   },
-  "author": "Roy Lu (royvbtw)",
+  "author": "Roy Lu(royvbtw)",
   "license": "MIT",
   "dependencies": {
     "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
     "bunyan": "^1.8.12",
-    "express": "^4.15.4",
+    "express": "^4.16.2",
     "express-handlebars": "^3.0.0",
     "express-session": "^1.15.5",
     "google-auth-library": "^0.10.0",

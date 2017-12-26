@@ -29,28 +29,31 @@ var handlebars = require('express-handlebars').create({
 
 // Set up passport middleware module for authentication(Facebook and google).
 var passport = require('passport');
-var Strategy = require('passport-facebook').Strategy;
+var FacebookStrategy = require('passport-facebook').Strategy;
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 
-// facebook passport strategy
-passport.use(new Strategy({
-	clientID: config.facebookClientID,
-	clientSecret: config.facebookClientSecret,
-	callbackURL: config.facebookCallbackURL,
-	profileFields: ['id', 'name', 'emails', "age_range", "displayName", "about", "gender"]
+// apply the facebook passport strategy
+passport.use(new FacebookStrategy({
+  clientID: config.facebookClientID,
+  clientSecret: config.facebookClientSecret,
+  callbackURL: config.facebookCallbackURL,
+  profileFields: ['id', 'name', 'emails', "age_range", "displayName", "about"],
+  enableProoft: true
 }, function(accessToken, refreshToken, profile, cb) {
-	return cb(null, profile);
+  return cb(null, profile);
 }));
 
+// apply a passport strategy for Google OAuth 2
 passport.use(new GoogleStrategy({
-	clientID: config.googleClientID,
-	clientSecret: config.googleClientSecret,
-	callbackURL: config.googleCallbackURL
+  clientID: config.googleClientID,
+  clientSecret: config.googleClientSecret,
+  callbackURL: config.googleCallbackURL
 }, function(accessToken, refreshToken, profile, cb) {
-	return cb(null, profile);
+  return cb(null, profile);
 }));
 passport.serializeUser(function(user, cb) { cb(null, user);});
 passport.deserializeUser(function(obj, cb) { cb(null, obj);});
+
 
 var app = express();
 var session = require('express-session');
@@ -58,7 +61,7 @@ app.use(session({
   cookie: { secure: false },
   resave: false,
   saveUninitialized: true,
-  secret: 'rockstone'
+  secret: config.sessionSecret
 }));
 app.use(express.static(__dirname + '/public'));
 
