@@ -4,7 +4,7 @@
   "description": "Good place for grumbling",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "gulp",
     "test": "mocha -c"
   },
   "author": "Roy Lu(royvbtw)",
@@ -27,8 +27,11 @@
     "doc": "doc"
   },
   "devDependencies": {
+    "browser-sync": "^2.23.3",
     "chai": "^4.1.2",
     "debug": "^2.6.9",
+    "gulp": "^4.0.0",
+    "gulp-nodemon": "^2.2.1",
     "mocha": "^3.5.3"
   },
   "repository": {
