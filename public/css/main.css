@@ -1,56 +1,67 @@
 
 *{
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 /*setup font size*/
 html{
-	font-family: "Microsoft JhengHei";
+  font-family: "Microsoft JhengHei";
 	font-size: 15px;	/* the min value*/
+	
 }
 @media (min-width: 720px){
-	html{
-		font-size: 16px;
-	}
+  html{
+    font-size: 16px;
+  }
 }
 @media (min-width: 720px){
-	html{
-		font-size: 17px;
-	}
+  html{
+    font-size: 17px;
+  }
 }
 
 body{
-	position: relative;
-	margin: 0px;
-	background-image: url('/img/bg-home.png');
-	padding: 0px;
+  position: relative;
+  margin: 0px;
+  background-image: url('/img/bg-home.png');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  padding: 0px;
 	overflow-x: hidden;
+	font-weight: 100;
 }
 
 footer{
-	display: block;
-	text-align: center;
-	margin: 30px 0 0 0;
-	padding: 20px 0 20px 250px;
-	background: darkslategray;
-	color: snow;
+  display: block;
+  text-align: center;
+  margin: 30px 0 0 0;
+  padding: 20px 0 20px 250px;
+  background: darkslategray;
+  color: snow;
 }
 
 
 h1{
-	width: 100%;
-	margin: 0 0 20px 0;
-	background-color: rgba(150, 150, 150, 0.9);
-	padding: 10px;
+  width: 100%;
+  margin: 0 0 20px 0;
+  background-color: rgba(150, 150, 150, 0.9);
+  padding: 10px;
 	color: snow;
+	font-size: 20px;
+	font-weight: 100;
+}
+@media (min-width: 720px){
+	h1{
+		font-size: 30px;
+	}
 }
 
 p{
-	width: 100%;
-	margin: auto;
-	padding: 10px 0;
-	border: 0px solid red;
-	text-align: left;
+  width: 100%;
+  margin: auto;
+  padding: 10px 0;
+  border: 0px solid red;
+  text-align: left;
 }
 
 pre{
@@ -133,18 +144,17 @@ span[data-info]:hover::before {
 	display: inline-block;
 	width: 200px;
 	margin: 5px;
-	border-radius: 10px;
-	box-shadow: 0 0 5px 0 indigo;
+	border-radius: 3px;
 	background: snow;
 	padding: 10px;
-	color: slategray;
+	color: grey;
 	text-decoration: none;
-	transition: all 500ms;
+	transition: all 400ms;
 }
 .btn-xauth:hover{
 	color: snow;
-	background-color: PaleVioletRed ;
-	box-shadow: 0 0 5px 0 gray;
+	background-color: PaleVioletRed;
+	text-decoration: none;
 }
 
 
@@ -211,7 +221,7 @@ span[data-info]:hover::before {
 
 .view-body{
 	display: block;
-	width: 95vw;
+	width: 100%;
 	margin: 0 auto;
 	border: 0px solid red;
 	padding: 0px;

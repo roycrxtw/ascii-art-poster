@@ -1,5 +1,13 @@
 
+<div class='user-view'>
+
 <h1>{{user.name}}</h1>
+
+{{#if flash}}
+<div class='alert'>
+  {{flash}}<span class='btn-close-alert'>x</span>
+</div>
+{{/if}}
 
 <div class='avator'>&#x1f383;</div>
 
@@ -18,6 +26,7 @@
   文章總數: {{user.postCount}}
 {{/if}}
 
+</div>
 
 <script>
 $('.btn-deleteUser').on('click', () => {

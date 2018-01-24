@@ -6,17 +6,52 @@ body{
 h1{
 	color: slategrey;
 	background-color: initial;
+	font-size: 30px;
+	font-weight: 100;
 }
+@media (min-width: 720px){
+	h1{
+		font-size: 55px;
+	}
+}
+
+
+.view-body{
+	display: block;
+	width: 100vw;
+}
+@media (min-width: 720px){
+	.view-body{
+		position: relative;
+		width: 83vw;
+    height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		align-content: center;
+    border: 0px solid red;
+  }
+}
+
+
 
 .content{
 	display: block;
+	width: 90%;
+	margin: 60px auto;
   border: 1px solid lightgrey;
   border-radius: 3px;
-  background-color: rgba(169, 169, 169, 0.9);
+  background-color: rgba(169, 169, 169, 0.90);
   padding: 20px;
   color: snow;
-  font-size: 30px;
+  font-size: 22px;
   text-align: left;
+}
+@media (min-width: 720px){
+	.content{
+		width: fit-content;
+		font-size: 30px;
+	}
 }
 
 .btn-start{
@@ -35,127 +70,4 @@ h1{
   background-color: snow;
   color: grey;
   text-decoration: none;
-}
-
-.view-body{
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-@media (min-width: 720px){
-	.view-body{
-    position: relative;
-    height: 100vh;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		align-content: center;
-    border: 0px solid red;
-  }
-}
-
-.tile-container{
-	display: block;
-	width: 100%;
-	margin: auto;
-	border: 0px solid red;
-	padding: 0;
-}
-
-.tile-container .tile{
-	float: left;
-	position: relative;
-	display: block;
-	width: 45vw;
-	height: 45vw;
-	justify-content: center;
-	align-items: center;
-	
-	margin: 0;
-	border: 15px solid snow;
-	padding: 0;
-	background-color: rgb(159, 197, 198);
-	
-	color: snow;
-	font-size: 4.5vmin;
-	text-decoration: none;
-	transition: all 300ms;
-}
-@media (min-width: 720px){
-	.tile-container .tile{
-		float: left;
-		width: 23vw;
-		height: 23vw;
-		overflow: hidden;
-		font-size: 3vmin;
-		border: 20px solid snow;
-	}
-}
-
-.tile-container .tile:hover{
-	border: 20px solid lightgrey;
-}
-@media (min-width: 720px){
-	.tile-container .tile:hover{
-		color: black;
-		border: 20px solid grey;
-	}
-}
-
-.tile-container .tile.x2{
-	width: 90vw;
-}
-@media (min-width: 720px){
-	.tile-container .tile.x2{
-		width: 46vw;
-	}
-}
-
-.tile-icon{
-	display: flex;
-	width: 100%;
-	height: 60%;
-	border: 0px solid grey;
-	justify-content: center;
-	align-items: center;
-}
-
-.block-caption{
-	width: 100%;
-	height: 40%;
-	border: 0px solid blue;
-}
-
-.tile-icon img{
-	width: 15vw;
-	height: 15vw;
-	border: 1px solid lightgrey;
-	border-radius: 10px;
-}
-@media (min-width: 720px){
-	.tile-icon img{
-		width: 6vw;
-		height: 6vw;
-		box-shadow: 0 0 5px 0 grey;
-	}
-}
-
-
-.block-extra{a{
-	display: flex;
-	position: absolute;
-	left: 0;
-	top: 0;
-	opacity: 0;
-	
-	width: 100%;
-	height: 100%;
-	justify-content: center;
-	align-items: center;
-	background-color: snow;
-	transition: all 500ms;
-}
-
-.block-extra:hover{
-	opacity: 1;
 }
