@@ -1,11 +1,20 @@
 
+<div class='not-found-view'>
 
 <h1>您迷路了嗎?</h1>
+
+{{#if flash}}
+<div class='alert'>
+  {{flash}}<span class='btn-close-alert'>x</span>
+</div>
+{{/if}}
 
 <p>Oops! 您迷路了嗎?</p>
 
 <div class='navi'>
-  
   <a class='navi-button' href="/">回到首頁</a>
   <a class='navi-button' href="/list">文章列表</a>
 </div>
+
+</div>
+

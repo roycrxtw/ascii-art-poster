@@ -1,23 +1,23 @@
 
-.masonry{
-	width: 100%;
-	column-count: 1;
-	-moz-column-count: 1;
-	column-gap: 1em;
-	-moz-column-gap: 1em;
-	margin: 20px auto 0px;
+body{
+	background-color: snow;
+	background-image: none;
+}
+
+.list{
+	width: 90%;
 	border: 0px solid blue;
+	margin: auto;
 	font-size: 15px;
 }
 @media (min-width: 720px){
-	.masonry{
+	.list{
 		font-size: 16px;
 	}
 }
 @media (min-width: 1280px){
-	.masonry{
-		column-count: 1;
-		-moz-column-count: 1;
+	.list{
+		width: 60vw;
 		font-size: 17px;
 	}
 }
@@ -31,37 +31,26 @@
 	color: red;
 }
 
-.viewBody .post{
+.list .post{
 	display: inline-block;
 	width: 90vw;
+	margin: 0 0 1vh;
 	border: 1px solid lightgrey;
 	border-radius: 5px;
 	background-color: snow;
-	margin: 0 0 1vh;
 	
-	box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.18);
 	
 	color: black;
-	
 	text-align: left;
 	transition: all 500ms;
 }
-.viewBody .post:hover{
-	border: 1px solid snow;
-	box-shadow: 0px 1px 13px 0px rgba(0, 0, 0, 0.1);
-}
 @media (min-width: 720px){
-	.viewBody .post{
+	.list .post{
 		display: block;
 		width: 60vw;
 		margin: 10px auto;
-		border: 0px solid snow;
-		border-right: 30px solid #396060;
+		border: 1px solid grey;
 		border-radius: 0px;
-	}
-
-	.viewBody .post:hover{
-		border: 0px solid snow;
 	}
 }
 
@@ -214,7 +203,6 @@
 }
 @media (min-width: 720px){
 	.list-navi .navi-tile{
-		height: 5vw;
 		padding: 10px;
 		margin: 2px;
 		background-color: lightgrey;
@@ -251,7 +239,7 @@
 @media (min-width: 720px){
 	.navi-button{
 		width: 7vw;
-		padding: 0;
+		border: 1px solid snow;
 	}
 }
 
@@ -269,11 +257,11 @@
 @media (min-width: 720px){
 	.list-navi .page-number{
 		position: fixed;
-		right: 0;
 		top: 0;
+		right: 0;
 		width: 10vw;
-		height: 10vw;
 		margin: 0;
+		padding: 0;
 		font-size: 2vw;
 		color: grey;
 		background-color: rgba(220, 220, 220, 0);
@@ -283,6 +271,5 @@
 @media (min-width: 720px){
 	.list-navi .page-info{
 		width: 10vw;
-		height: 5vw;
 	}
 }

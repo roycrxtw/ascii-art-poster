@@ -1,25 +1,57 @@
 body{
-	color: black;
+  color: black;
+  
 }
 
-.viewBody{
-	width: 100vw;
+h1{
+	color: slategrey;
+	background-color: initial;
+}
+
+.content{
+	display: block;
+  border: 1px solid lightgrey;
+  border-radius: 3px;
+  background-color: rgba(169, 169, 169, 0.9);
+  padding: 20px;
+  color: snow;
+  font-size: 30px;
+  text-align: left;
+}
+
+.btn-start{
+  display: block;
+  width: fit-content;
+  margin: 3px;
+  border: 1px solid grey;
+  border-radius: 3px;
+  background-color: mediumvioletred;
+  padding: 3px 10px;
+  color: snow;
+  text-decoration: none;
+  transition: all 400ms;
+}
+.btn-start:hover{
+  background-color: snow;
+  color: grey;
+  text-decoration: none;
+}
+
+.view-body{
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	
-	background-color: snow;
 }
 @media (min-width: 720px){
-	.viewBody{
-		width: 80vw;
+	.view-body{
+    position: relative;
+    height: 100vh;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		align-content: center;
-		border: 0px solid red;
-		background-color: snow;
-	}
+    border: 0px solid red;
+  }
 }
 
 .tile-container{
@@ -109,7 +141,7 @@ body{
 }
 
 
-.block-extra{
+.block-extra{a{
 	display: flex;
 	position: absolute;
 	left: 0;

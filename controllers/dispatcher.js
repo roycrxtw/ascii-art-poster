@@ -37,6 +37,7 @@ router.get(['/', '/home'], function(req, res, next){
 
 router.get('/about', async function(req, res, next){
 	const data = await service.about();
+	res.locals.css = ['about'];
 	return res.render('about', data);
 });
 

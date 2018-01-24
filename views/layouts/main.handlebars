@@ -1,11 +1,12 @@
 <!doctype html>
 
-<html>
+<html lang='zh-tw'>
 <head>
   <title>Grumbler - Let's grumbling!</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" type="text/css" href='/css/main.css' />
+  <link rel='stylesheet' href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel='stylesheet' type='text/css' href='/css/main.css' />
   {{#each css}}
     <link rel="stylesheet" type="text/css" href='/css/{{this}}.css' />
   {{/each}}
@@ -18,15 +19,15 @@
 <body>
 
 <div class="menu">
-	<a class='title' href='/'>Grumbler</a>
+	<a class='title' href='/'>ASCII ARTS小展覽</a>
 	<nav>
 		<ul>
 		  <li><a class='menu-btn' href='/'>home</a></li>
-			<li><a class='menu-btn' href='/list'>抱怨大全</a></li>
-			<li><a class='menu-btn' href='/post'>開始抱怨</a></li>
+			<li><a class='menu-btn' href='/list'>Ascii-arts列表</a></li>
+			<li><a class='menu-btn' href='/post'>發表</a></li>
 			<li><a class='menu-btn' href='/about'>關於這裡</a></li>
 			{{#if uid}}
-			<li><a class='menu-btn' href='/user/{{uid}}/list'>你的抱怨</a></li>
+			<li><a class='menu-btn' href='/user/{{uid}}/list'>你的發表</a></li>
 			<li><a class='menu-btn' href='/user/'>管理帳號</a></li>
 			<li><a class='menu-btn' href='/logout'>登出</a></li>
 			{{else}}
@@ -39,28 +40,27 @@
 	{{#if uid}}<div class='displayName'>welcome, {{displayName}}!</div>{{/if}}
 	
   <div class='menu-footer'>
-    <a href='https://github.com/royvbtw/grumbler'>github</a><br/>Roy Lu, 2017
+    <a href='https://github.com/royvbtw/grumbler'>github</a><br/>Roy Lu, 2018
   </div>
 	
 </div><!-- end of menu -->
 
-{{#if flash}}<div class='flash-container'>
-<div class='flash'>{{flash}}<span class='btnFlashClose'>x</span></div></div>{{/if}}
 
-<div class="viewBody">
+<div class='view-body'>
   {{{body}}}
 </div>
+
 
 </body>
 
 <script>
 
-$('.flash').on('click', function(evt){
+$('.alert').on('click', function(evt){
 	$(this).fadeOut(800);
 });
 
 $(document).ready(function(){
-	$('.flash').hide().delay(100).fadeIn(800);
+	$('.alert').hide().delay(100).fadeIn(800);
 });
 
 </script>

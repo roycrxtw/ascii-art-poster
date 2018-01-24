@@ -1,0 +1,56 @@
+.body{
+	background-color: snow;
+	background-image: none;
+}
+
+.about-view{
+	min-height: 100vh;
+	padding: 5px 50px;
+	background-color: rgba(50, 50, 50, 0.9);
+	color: snow;
+}
+
+h1{
+	color: wheat;
+	text-align: left;
+}
+
+a{
+	color: #5d7fb9;
+	text-decoration: initial;
+}
+
+a:hover{
+	color: #5d7fb9;
+}
+
+.list-about{
+	width: fit-content;
+	margin: 0;
+	padding: 0;
+	text-align: left;
+	list-style: none;
+}
+
+.list-item{
+	display: inline-block;
+	margin: 5px;
+	border: 1px solid snow;
+	padding: 0;
+	text-align: center;
+}
+
+.list-item-name{
+	display: block;
+	width: 200px;
+	color: snow;
+	background-color: grey;
+	padding: 10px;
+}
+
+.list-item-value{
+	display: block;
+	margin: 20px 0;
+	color: salmon;
+	font-size: 50px;
+}

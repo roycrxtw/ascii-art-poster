@@ -1,5 +1,13 @@
 
+<div class='login-view'>
+
 <h1>登入</h1>
+
+{{#if flash}}
+<div class='alert'>
+  {{flash}}<span class='btn-close-alert'>x</span>
+</div>
+{{/if}}
 
 <div class='block-xauth'>
 	<p class='block-xauth-note'>不想註冊嗎?<br/>直接透過社群軟體登入</p>
@@ -24,3 +32,6 @@
       value='{{password}}' name="password" required/>
   <input class="btnSubmit" type="submit" value="登入" />
 </form>
+
+</div>
+

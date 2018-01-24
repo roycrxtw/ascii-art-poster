@@ -6,21 +6,25 @@
 /*setup font size*/
 html{
 	font-family: "Microsoft JhengHei";
-	font-size: 14px;	/* the min value*/
+	font-size: 15px;	/* the min value*/
 }
 @media (min-width: 720px){
 	html{
-		font-size: 15px;
+		font-size: 16px;
+	}
+}
+@media (min-width: 720px){
+	html{
+		font-size: 17px;
 	}
 }
 
 body{
 	position: relative;
-	
-	background: snow;
 	margin: 0px;
+	background-image: url('/img/bg-home.png');
 	padding: 0px;
-	color: black;
+	overflow-x: hidden;
 }
 
 footer{
@@ -32,23 +36,13 @@ footer{
 	color: snow;
 }
 
-a:not([class]){
-	margin: 0;
-	padding: 0;
-	color: lightsalmon;
-	text-decoration: none;
-	transition: all 500ms;
-}
-
-a:not([class]):hover{
-	color: red;
-}
 
 h1{
-	margin: 20px 0 0 0;
-	text-align: center;
-	color: slategray;
-	border: 0px solid black;
+	width: 100%;
+	margin: 0 0 20px 0;
+	background-color: rgba(150, 150, 150, 0.9);
+	padding: 10px;
+	color: snow;
 }
 
 p{
@@ -63,7 +57,6 @@ pre{
 	font-family: "Microsoft JhengHei";
 	white-space: pre-wrap;
 }
-
 
 
 span[data-info]{
@@ -155,7 +148,7 @@ span[data-info]:hover::before {
 }
 
 
-.btnFlashClose{
+.btn-close-alert{
 	position: absolute;
 	right: 0px;
 	top: 0px;
@@ -163,51 +156,32 @@ span[data-info]:hover::before {
 	cursor: pointer;
 }
 
-.flash-container{
-	width: 95%;
-	padding: 0;
-}
-@media (min-width: 720px){
-	.flash-container{
-		width: 100%;
-		padding-left: 250px;
-	}
-}
 
-.flash{
+.alert{
 	display: none;
 	position: relative;
 	width: 90%;
 	margin: 10px auto;
-	box-shadow: 0 0 5px 0 snow;
-	border-radius: 5px;
+	border: 0px solid snow;
+	border-radius: 3px;
 	padding: 10px;
-	background-color: red;
+	background-color: orange;
 	color: snow;
+	font-weight: 400;
 	cursor: pointer;
+	clear: both;
 }
 @media (min-width: 720px){
-	.flash{
+	.alert{
 		width: 400px;
 		padding: 10px;
 	}
 }
-.flash:before{
+.alert:before{
 	content: '\002757';
 	padding: 10px;
 	color: snow;
 }
-
-@media (min-width: 720px){
-	.content-about{
-		margin-left: 100px;	
-	}
-	
-	.content-about h1{
-		text-align: left;
-	}
-}
-
 
 
 .panel{
@@ -235,19 +209,19 @@ span[data-info]:hover::before {
 
 
 
-.viewBody{
+.view-body{
 	display: block;
 	width: 95vw;
-	margin: auto;
+	margin: 0 auto;
 	border: 0px solid red;
 	padding: 0px;
 	text-align: center;
 }
 @media (min-width: 720px){
-	.viewBody{
+	.view-body{
 		position: relative;
-		width: 80vw;
-		margin: 0 0 0 18vw;
+		width: 83vw;
+		margin: 0 0 0 17vw;
 		padding: 0;
 	}
 }
@@ -281,8 +255,8 @@ span[data-info]:hover::before {
 		top: 0;
 		width: 17vw;
 		min-height: 100%;
-		background-color: snow;
-		color: slategrey;
+		background-color: rgba(50, 50, 50, 0.95);
+		color: snow;
 		font-size: 2.5vmin;
 	}
 }
@@ -329,8 +303,7 @@ span[data-info]:hover::before {
 	text-decoration: none;
 	color: snow;
 	border: 0px solid green;
-	border-radius: 3px;
-	padding: 5px;
+	padding: 5px 10px;
 	
 }
 .menu nav a:hover{
@@ -340,12 +313,14 @@ span[data-info]:hover::before {
 @media (min-width: 720px){
 	.menu nav a{
 		display: inline-block;
-		color: black;
+		color: snow;
+		transition: all 400ms;
 	}
 	
 	.menu nav a:hover{
 		color: snow;
-		background-color: #c5ccd3;
+		border-left: 5px solid orange;
+		background-color: initial;
 	}
 }
 
@@ -354,7 +329,7 @@ span[data-info]:hover::before {
 	margin: 0;
 	padding: 0;
 	color: snow;
-	border: 1px solid snow;
+	border: 0px solid snow;
 	text-align: center;
 }
 @media (min-width: 720px){
@@ -402,10 +377,10 @@ span[data-info]:hover::before {
 	.menu .title{
 		display: block;
 		margin: 0;
-		padding: 10px 0px 10px 55px;
-		color: black;
+		background-color: rgba(120, 120, 120, 0.5);
+		padding: 13px 0px 13px 55px;
+		color: snow;
 		font-size: 3vmin;
 		text-align: left;
-		background-color: snow;
 	}
 }

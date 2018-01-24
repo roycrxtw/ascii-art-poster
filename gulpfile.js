@@ -3,7 +3,7 @@ const gulp = require('gulp');
 const browserSync = require('browser-sync');
 const nodemon = require('gulp-nodemon');
 
-const paths = ['public/**/*.css', 'views/*.*'];
+const paths = ['public/css/*.css', 'views/**/*.handlebars'];
 
 function reload(done) {
   browserSync.reload();

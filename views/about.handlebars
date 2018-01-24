@@ -1,14 +1,26 @@
 
-<div class='content-about'>
+<div class='about-view'>
   <h1>關於這裡</h1>
+
+  {{#if flash}}
+  <div class='alert'>
+    {{flash}}<span class='btn-close-alert'>x</span>
+  </div>
+  {{/if}}
 
   <p>A place where everyone can release his/her stress!</p>
 
-  <div class='panel'>
-    <div class='panel-title'>統計資料</div>
-    <div class='panel-item'>文章總數: {{postCount}}/{{allPostCount}}</div>
-    <div class='panel-item'>使用者人數: {{userCount}}</div>
-  </div>
+  <ul class='list-about'>
+    <li class='list-header'>統計資料</li>
+    <li class='list-item'>
+      <span class='list-item-name'>文章總數</span>
+      <span class='list-item-value'>{{postCount}}/{{allPostCount}}</span>
+    </li>
+    <li class='list-item'>
+      <span class='list-item-name'>使用者人數</span>
+      <span class='list-item-value'>{{userCount}}</span>
+    </li>
+  </ul>
 
   <p style='color: indianred;'>* THIS WEB APP IS FOR DEMO PURPOSE.</p>
 
@@ -18,5 +30,5 @@
     <a href='https://royvbtw.uk/'>royvbtw.uk</a><br/>
   </p>
 
-  <p>T1834</p>
+  <p>24T1755</p>
 </div>

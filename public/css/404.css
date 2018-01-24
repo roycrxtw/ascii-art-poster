@@ -1,11 +1,18 @@
 
+.not-found-view{
+  min-height: 100vh;
+  background-color: rgba(50, 50, 50, 0.9);
+  color: snow;
+  text-align: center;
+}
+
 p{
 	text-align: center;
 }
 
 .navi{
 	display: inline-block;
-	border: 1px solid lightgray;
+	border: 0px solid lightgray;
 	border-radius: 5px;
 	padding: 10px;
 }
@@ -15,8 +22,7 @@ p{
 	width: 100px;
 	height: 60px;
 	margin: 10px;
-	border-bottom: 10px solid grey;
-	background-color: lightgrey;
+  background-color: darkslategrey;
 	justify-content: center;
 	align-items: center;
 	color: snow;
@@ -25,6 +31,8 @@ p{
 	transition: all 500ms;
 }
 .navi-button:hover{
-	color: grey;
-	background-color: snow;
+  color: grey;
+  border-bottom: 10px solid darkorange;
+  background-color: snow;
+  text-decoration: none;
 }

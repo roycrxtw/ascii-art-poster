@@ -1,4 +1,13 @@
-<h1>註冊一個grumbler帳號</h1>
+
+<div class='register-view'>
+
+<h1>註冊一個ASCII-ARTS小展覽帳號</h1>
+
+{{#if flash}}
+<div class='alert'>
+  {{flash}}<span class='btn-close-alert'>x</span>
+</div>
+{{/if}}
 
 <div class='block-xauth'>
   <p class='block-xauth-note'>不想註冊嗎?<br/>直接透過社群軟體登入</p>
@@ -38,6 +47,9 @@
 
 	<input class="btnSubmit" type="submit" value='註冊' />
 </form>
+
+</div>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
 <script>

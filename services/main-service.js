@@ -245,16 +245,15 @@ function validateUserFields(user, opt){
  * @return {object} information about this project.
  */
 async function about(){
-	try{
-		let result = {};
-		result.userCount = await userDao.countUsers();
-		result.postCount = await countPosts();
-		result.allPostCount = await countPosts({ignoreExpiry: true});
-		debug({result}, 'about() finished.');
-		return result;
-	}catch(ex){
-		log.error({ex: ex.stack}, 'Error in about().');
-	}
+  try{
+    const result = {};
+    result.userCount = await userDao.countUsers();
+    result.postCount = await countPosts();
+    result.allPostCount = await countPosts({ignoreExpiry: true});
+    return result;
+  }catch(ex){
+    log.error({ex: ex.stack}, 'Error in about().');
+  }
 }
 
 

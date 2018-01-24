@@ -1,5 +1,5 @@
 
-exports.postCategory = ['抱怨', '靠北', '崩潰', '天啊', '機車', '無言', '見鬼'];
+exports.postCategory = ['分享', '原創', '新手'];
 
 exports.expiryTypes = [
 	{name: '永存',		offset: 90000000000000},
