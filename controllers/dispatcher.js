@@ -350,6 +350,9 @@ router.post('/post', async (req, res, next) => {
 });
 
 
+router.get('/posts/:id?', service.readPostHandler);
+
+
 /**
  * Get the register page.
  */

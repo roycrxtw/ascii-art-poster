@@ -3,8 +3,9 @@
 
 'use strict';
 
-var mongoose = require('mongoose');
-var config = require('../config/db.config');
+const mongoose = require('mongoose');
+const config = require('../config/main.config');
+const DB_URL = config.dbUrl;
 
 const LOG_LEVEL = require('../config/main.config').LOG_LEVEL;
 var bunyan = require('bunyan');
@@ -25,7 +26,7 @@ var options = {
 
 // create a connection to mongodb
 mongoose.Promise = global.Promise;
-mongoose.connect(config.dburl, options);
+mongoose.connect(DB_URL, options);
 const conn = mongoose.connection;
 
 // connect events

@@ -1,23 +1,26 @@
 
 /**
- * Project Grumbler
+ * Project Ascii-arts Poster
  * @author Roy Lu(royvbtw)
- * Sep, 2017
+ * Jan 2018
  */
 
 'use strict';
+
+const config = require('../config/main.config');
 
 var conn = require('../dao/connection');
 var userDao = require('../dao/user-dao');
 var postDao = require('../dao/post-dao');
 var serviceData = require('./service-data');
+const dbService = require('./database-service');
+dbService.init(config.dbUrl, 'mymongo');
 
 var passwordService = require('./password-service');
 
 let debug = require('debug')('main');
 var request = require('request');
 
-const config = require('../config/main.config');
 const LOG_LEVEL = config.LOG_LEVEL;
 
 let logSettings = [];
@@ -58,6 +61,7 @@ exports.login = login;
 exports.createPost = createPost;
 exports.deletePost = deletePost;
 exports.countPosts = countPosts;
+module.exports.readPostHandler = readPostHandler;
 
 
 function getPostSettings(){
@@ -571,4 +575,18 @@ async function updateUserName(user){
 		log.error({user, error: ex.stack}, 'Error in main.updateUserName()');
 		return {failed: '更新資料失敗，請重新送出'};
 	};
+}
+
+async function readPostHandler(req, res, next){
+	const id = req.params.id;
+	log.info(`readPostHandler(${id}) started`);
+	
+	try{
+		const post = await dbService.readPost(id);
+		log.info(`post=`, post);
+		return res.json(post);
+	}catch(ex){
+		log.error(ex, 'Error in readPostHandler()');
+		return {failed: '更新資料失敗，請重新送出'};
+	}
 }

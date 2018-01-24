@@ -17,6 +17,7 @@
     "express-handlebars": "^3.0.0",
     "express-session": "^1.15.5",
     "google-auth-library": "^0.10.0",
+    "mongodb": "^3.0.1",
     "mongoose": "^4.11.12",
     "passport": "^0.3.2",
     "passport-facebook": "^2.1.1",
@@ -32,6 +33,7 @@
     "debug": "^2.6.9",
     "gulp": "^4.0.0",
     "gulp-nodemon": "^2.2.1",
+    "jest": "^22.1.4",
     "mocha": "^3.5.3"
   },
   "repository": {
