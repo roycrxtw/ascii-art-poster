@@ -1,7 +1,7 @@
 {
-  "name": "grumbler",
+  "name": "ascii-art-poster",
   "version": "1.1.0",
-  "description": "Good place for ascii-arts",
+  "description": "An ASCII ART Gallery",
   "main": "index.js",
   "scripts": {
     "start": "gulp",
@@ -38,6 +38,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/royvbtw/grumbler.git"
+    "url": "https://github.com/royvbtw/ascii-art-poster.git"
   }
 }
